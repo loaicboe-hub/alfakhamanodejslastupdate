@@ -40,7 +40,7 @@ define('DB_PASS', 'YOUR_STRONG_PASSWORD_HERE');    // Put your Hostinger DB Pass
 define('ADMIN_SECRET_KEY', 'Alfakhama2026@GoldFries'); // Change to your preferred key
 
 // Email to receive quote notifications
-define('NOTIFICATION_EMAIL', 'info@alfakhama-fries.com');
+define('NOTIFICATION_EMAIL', 'info@alfakhamafactory.com');
 ```
 
 ---
@@ -104,7 +104,7 @@ define('DB_PASS', 'YOUR_STRONG_PASSWORD_HERE');    // ضع كلمة المرور
 define('ADMIN_SECRET_KEY', 'Alfakhama2026@GoldFries');
 
 // بريدك الإلكتروني لاستقبال إشعارات الطلبات
-define('NOTIFICATION_EMAIL', 'info@alfakhama-fries.com');
+define('NOTIFICATION_EMAIL', 'info@alfakhamafactory.com');
 ```
 
 ---

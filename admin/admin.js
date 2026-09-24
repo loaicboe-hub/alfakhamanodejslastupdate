@@ -295,7 +295,7 @@ const defaultUsers = [
     id: 1,
     name: "Al Fakhama Admin",
     username: "admin",
-    email: "admin@alfakhama-fries.com",
+    email: "admin@alfakhamafactory.com",
     role: "super_admin",
     status: "active",
     createdAt: "2026-01-15"
@@ -304,7 +304,7 @@ const defaultUsers = [
     id: 2,
     name: "Tarek Mansour",
     username: "tarek.export",
-    email: "t.mansour@alfakhama-fries.com",
+    email: "t.mansour@alfakhamafactory.com",
     role: "admin",
     status: "active",
     createdAt: "2026-02-10"
@@ -313,7 +313,7 @@ const defaultUsers = [
     id: 3,
     name: "Mona Radwan",
     username: "mona.content",
-    email: "m.radwan@alfakhama-fries.com",
+    email: "m.radwan@alfakhamafactory.com",
     role: "editor",
     status: "active",
     createdAt: "2026-03-01"
@@ -340,7 +340,7 @@ try {
     currentAdminProfile = {
       name: "Al Fakhama Admin",
       username: "admin",
-      email: "admin@alfakhama-fries.com",
+      email: "admin@alfakhamafactory.com",
       role: "super_admin"
     };
     localStorage.setItem("alfakhama_admin_profile", JSON.stringify(currentAdminProfile));
@@ -351,7 +351,7 @@ try {
   currentAdminProfile = {
     name: "Al Fakhama Admin",
     username: "admin",
-    email: "admin@alfakhama-fries.com",
+    email: "admin@alfakhamafactory.com",
     role: "super_admin"
   };
 }

@@ -20,7 +20,7 @@ define('DB_CHARSET', 'utf8mb4');
 define('ADMIN_SECRET_KEY', 'Alfakhama2026@GoldFries');
 
 // Optional Email Notification Recipient
-define('NOTIFICATION_EMAIL', 'info@alfakhama-fries.com');
+define('NOTIFICATION_EMAIL', 'info@alfakhamafactory.com');
 
 /**
  * Get PDO Database Connection instance

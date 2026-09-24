@@ -107,7 +107,7 @@ try {
                    . "Notes: {$message}\n\n"
                    . "Date: " . date('Y-m-d H:i:s') . "\n";
 
-        $headers = "From: no-reply@" . ($_SERVER['HTTP_HOST'] ?? 'alfakhama-fries.com') . "\r\n"
+        $headers = "From: no-reply@" . ($_SERVER['HTTP_HOST'] ?? 'alfakhamafactory.com') . "\r\n"
                  . "Reply-To: {$email}\r\n"
                  . "X-Mailer: PHP/" . phpversion();
 

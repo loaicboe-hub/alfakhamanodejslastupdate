@@ -274,7 +274,7 @@ const translations = {
     
     infoTitle: "Company Information",
     infoEmailLabel: "Email Inquiries",
-    infoEmailVal: "info@alfakhama-fries.com",
+    infoEmailVal: "info@alfakhamafactory.com",
     infoPhoneLabel: "Phone / Direct Line",
     infoPhoneVal: "+20 103 524 4871",
     infoWaLabel: "WhatsApp Business",
@@ -591,7 +591,7 @@ const translations = {
 
     infoTitle: "بيانات التواصل",
     infoEmailLabel: "البريد الإلكتروني التجاري",
-    infoEmailVal: "info@alfakhama-fries.com",
+    infoEmailVal: "info@alfakhamafactory.com",
     infoPhoneLabel: "الهاتف / الخط المباشر",
     infoPhoneVal: "+20 103 524 4871",
     infoWaLabel: "واتساب التجاري",

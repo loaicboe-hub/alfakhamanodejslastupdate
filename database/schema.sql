@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
 INSERT INTO `admin_users` 
   (`username`, `email`, `password_hash`, `full_name`, `role`, `status`)
 VALUES 
-  ('admin', 'admin@alfakhama-fries.com', '$2y$10$eA09yvQ6xR5uH0uS.Z53..u7mE2mQe5eU2l1q8f9d0c1b2a3b4c5d', 'Al Fakhama Admin', 'super_admin', 'active')
+  ('admin', 'admin@alfakhamafactory.com', '$2y$10$eA09yvQ6xR5uH0uS.Z53..u7mE2mQe5eU2l1q8f9d0c1b2a3b4c5d', 'Al Fakhama Admin', 'super_admin', 'active')
 ON DUPLICATE KEY UPDATE `username`=`username`;
 
 -- ----------------------------------------------------------------------------
