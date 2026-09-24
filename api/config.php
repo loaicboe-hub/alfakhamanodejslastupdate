@@ -11,9 +11,9 @@ defined('ALFAKHAMA_APP') or define('ALFAKHAMA_APP', true);
 // Update these values with the details from your Hostinger hPanel -> Databases
 // ============================================================================
 define('DB_HOST', 'localhost');          // Hostinger default is 'localhost'
-define('DB_NAME', 'u123456789_alfakhama'); // Replace with your Hostinger DB Name
-define('DB_USER', 'u123456789_dbuser');    // Replace with your Hostinger DB User
-define('DB_PASS', 'YOUR_DB_PASSWORD_HERE');// Replace with your Hostinger DB Password
+define('DB_NAME', 'u128613351_alfakhama');
+define('DB_USER', 'u128613351_dbadmin');
+define('DB_PASS', 'Alfakhama@2027');
 define('DB_CHARSET', 'utf8mb4');
 
 // Admin Dashboard Secret Key (Change this to any secure password for dashboard access)
