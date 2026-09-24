@@ -68,7 +68,7 @@ function initRFQ() {
         ? `مرحباً شركة الفخامة (هارف فرايز)،\nأنا ${name} من شركة ${company}.\nأود الاستفسار وطلب تسعير توريد لمنتج: ${cut}، بكمية تقديرية: ${qty}.\nيرجى تزويدنا بالمواصفات وشروط التوريد.`
         : `Hello Al Fakhama (HARV FRIES),\nI am ${name} from ${company}.\nI would like to inquire about a supply quote for: ${cut}, Estimated Volume: ${qty}.\nPlease provide us with your export catalog and pricing.`;
 
-      const waNumber = "201062617150";
+      const waNumber = "201035244871";
       const encodedMsg = encodeURIComponent(message);
       window.open(`https://wa.me/${waNumber}?text=${encodedMsg}`, "_blank");
     });
