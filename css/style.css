@@ -391,8 +391,8 @@ img {
   position: absolute;
   top: 0;
   right: 0;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-top: 3px solid var(--gold-pure);
   border-right: 3px solid var(--gold-pure);
   border-top-right-radius: 4px;
@@ -406,14 +406,29 @@ img {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   border-bottom: 3px solid var(--gold-pure);
   border-left: 3px solid var(--gold-pure);
   border-bottom-left-radius: 4px;
   pointer-events: none;
   z-index: 5;
   box-shadow: -2px 2px 8px rgba(201, 164, 92, 0.35);
+}
+
+@media (max-width: 767px) {
+  .gold-corner-frame::after {
+    width: 18px;
+    height: 18px;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
+  .gold-corner-frame::before {
+    width: 18px;
+    height: 18px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
 }
 
 /* ==========================================================================
