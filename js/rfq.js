@@ -27,7 +27,7 @@ function initRFQ() {
       };
 
       try {
-        const response = await fetch("api/submit_rfq.php", {
+        const response = await fetch("/api/rfq/submit", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"

@@ -483,7 +483,7 @@ function initInquiries() {
   const exportBtn = document.getElementById("exportCsvBtn");
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
-      window.location.href = `../api/get_quotes.php?key=${encodeURIComponent(currentSecretKey)}&export=csv`;
+      window.location.href = `/api/admin/quotes?key=${encodeURIComponent(currentSecretKey)}&export=csv`;
       showToast("Downloading CSV export file...");
     });
   }
@@ -594,7 +594,7 @@ async function loadInquiries() {
   tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2.5rem; color: #a3a39e;">Connecting to Hostinger MySQL Database...</td></tr>`;
 
   try {
-    const res = await fetch(`../api/get_quotes.php?key=${encodeURIComponent(currentSecretKey)}&status=all`);
+    const res = await fetch(`/api/admin/quotes?key=${encodeURIComponent(currentSecretKey)}&status=all`);
 
     if (res.status === 401) {
       promptSecretKey();
@@ -853,7 +853,7 @@ window.executePendingDelete = async function() {
     const id = target.id;
 
     try {
-      const res = await fetch("../api/get_quotes.php", {
+      const res = await fetch("/api/admin/quotes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -882,7 +882,7 @@ window.executePendingDelete = async function() {
     const ids = target.ids;
 
     try {
-      const res = await fetch("../api/get_quotes.php", {
+      const res = await fetch("/api/admin/quotes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -925,7 +925,7 @@ window.bulkMarkCompleted = async function() {
 
   try {
     for (const id of ids) {
-      fetch("../api/get_quotes.php", {
+      fetch("/api/admin/quotes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -955,7 +955,7 @@ window.toggleCompleteStatus = async function(id) {
   localStorage.setItem("alfakhama_demo_inquiries", JSON.stringify(inquiriesData));
 
   try {
-    await fetch("../api/get_quotes.php", {
+    await fetch("/api/admin/quotes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -980,7 +980,7 @@ window.updateInquiryStatus = async function(id, newStatus) {
   localStorage.setItem("alfakhama_demo_inquiries", JSON.stringify(inquiriesData));
 
   try {
-    const res = await fetch("../api/get_quotes.php", {
+    const res = await fetch("/api/admin/quotes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1657,7 +1657,7 @@ function initDbSecuritySettings() {
       dbStatus.style.color = "var(--gold)";
 
       try {
-        const res = await fetch(`../api/get_quotes.php?key=${encodeURIComponent(currentSecretKey)}`);
+        const res = await fetch(`/api/admin/quotes?key=${encodeURIComponent(currentSecretKey)}`);
         const data = await res.json();
         if (data.success) {
           dbStatus.textContent = "✓ Connected to Hostinger MySQL successfully!";
