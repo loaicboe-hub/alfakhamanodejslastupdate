@@ -18,14 +18,19 @@ async function deploy() {
     const host = process.env.FTP_HOST || "147.79.103.106";
     const user = process.env.FTP_USER || "u128613351";
     const password = process.env.FTP_PASSWORD || "Alfakhama@2027";
-    const remoteDir = process.env.FTP_REMOTE_DIR || "domains/alfakhamafactory-com-480061.hostingersite.com/public_html";
+    const targetDirs = process.env.FTP_REMOTE_DIR 
+        ? [process.env.FTP_REMOTE_DIR]
+        : [
+            "domains/alfakhamafactory.com/public_html",
+            "domains/alfakhamafactory-com-480061.hostingersite.com/public_html"
+          ];
     const projectRoot = path.resolve(__dirname, "..");
 
     console.log("==========================================");
     console.log("🚀 Starting deployment to Hostinger...");
     console.log(`📡 Host: ${host}`);
     console.log(`👤 User: ${user}`);
-    console.log(`📁 Target: ${remoteDir}`);
+    console.log(`📁 Targets:\n - ${targetDirs.join("\n - ")}`);
     console.log("==========================================\n");
 
     try {
@@ -37,8 +42,6 @@ async function deploy() {
             secureOptions: { rejectUnauthorized: false }
         });
         console.log("✅ Authenticated & Connected successfully via FTPS (TLSv1.3)\n");
-
-        await client.ensureDir(remoteDir);
 
         const itemsToUpload = [
             "index.html",
@@ -54,23 +57,33 @@ async function deploy() {
             "database"
         ];
 
-        for (const item of itemsToUpload) {
-            const localPath = path.join(projectRoot, item);
-            if (!fs.existsSync(localPath)) continue;
+        for (const remoteDir of targetDirs) {
+            console.log(`\n==========================================`);
+            console.log(`🚀 Deploying to: /${remoteDir}`);
+            console.log(`==========================================`);
+            
+            await client.cd("/");
+            await client.ensureDir(remoteDir);
 
-            const stat = fs.statSync(localPath);
-            if (stat.isDirectory()) {
-                console.log(`📦 Syncing folder: [${item}]...`);
-                await client.uploadFromDir(localPath, item);
-            } else {
-                console.log(`📄 Uploading file: ${item}...`);
-                await client.uploadFrom(localPath, item);
+            for (const item of itemsToUpload) {
+                const localPath = path.join(projectRoot, item);
+                if (!fs.existsSync(localPath)) continue;
+
+                const stat = fs.statSync(localPath);
+                if (stat.isDirectory()) {
+                    console.log(`📦 Syncing folder: [${item}]...`);
+                    await client.uploadFromDir(localPath, item);
+                } else {
+                    console.log(`📄 Uploading file: ${item}...`);
+                    await client.uploadFrom(localPath, item);
+                }
             }
         }
 
         console.log("\n==========================================");
         console.log("🎉 DEPLOYMENT COMPLETED SUCCESSFULLY!");
-        console.log("🌐 URL: https://alfakhamafactory-com-480061.hostingersite.com");
+        console.log("🌐 LIVE WEBSITE: https://www.alfakhamafactory.com");
+        console.log("🌐 PREVIEW URL:  https://alfakhamafactory-com-480061.hostingersite.com");
         console.log("==========================================");
 
     } catch (err) {
