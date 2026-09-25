@@ -1,5 +1,5 @@
 /**
- * AL FAKHAMA (HARV FRIES) - Products, Cut Explorer & Specs Modal
+ * AL FAKHAMA - Products, Cut Explorer & Specs Modal
  */
 
 const productSpecsData = {

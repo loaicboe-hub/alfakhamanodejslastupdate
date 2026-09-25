@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * AL FAKHAMA FACTORY (HARV FRIES) - NODE.JS / EXPRESS BACKEND SERVER
+ * AL FAKHAMA FACTORY - NODE.JS / EXPRESS BACKEND SERVER
  * ==============================================================================
  * B2B Export Portal: French Fries & IQF Frozen Vegetables / Fruits
  * Production-ready server for Hostinger Node.js Web Apps & VPS
@@ -512,7 +512,7 @@ app.get('*', (req, res) => {
 const server = app.listen(PORT, () => {
   console.log(`
   =============================================================
-  🌟 AL FAKHAMA (HARV FRIES) NODE.JS PORTAL RUNNING
+  🌟 AL FAKHAMA NODE.JS PORTAL RUNNING
   =============================================================
   🌐 Main Portal:    http://localhost:${PORT}/
   🛡️ Admin Panel:    http://localhost:${PORT}/admin

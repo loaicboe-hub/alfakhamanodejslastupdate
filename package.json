@@ -1,7 +1,7 @@
 {
   "name": "alfakhama-factory-portal",
   "version": "2.0.0",
-  "description": "Al Fakhama (HARV FRIES) - B2B Industrial Frozen Potatoes & Vegetables Portal with Node.js Backend",
+  "description": "Al Fakhama - B2B Industrial Frozen Potatoes & Vegetables Portal with Node.js Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,5 +1,5 @@
 /**
- * AL FAKHAMA (HARV FRIES) - Main UI, Scroll Spy, Mobile Drawer & Lightbox
+ * AL FAKHAMA - Main UI, Scroll Spy, Mobile Drawer & Lightbox
  */
 
 document.addEventListener("DOMContentLoaded", () => {

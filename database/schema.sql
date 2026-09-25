@@ -1,5 +1,5 @@
 -- ============================================================================
--- AL FAKHAMA (HARV FRIES) - MYSQL DATABASE SCHEMA FOR HOSTINGER
+-- AL FAKHAMA - MYSQL DATABASE SCHEMA FOR HOSTINGER
 -- Compatible with Hostinger hPanel MySQL 5.7+ / 8.0+ / MariaDB
 -- ============================================================================
 

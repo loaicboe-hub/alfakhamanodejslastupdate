@@ -1,12 +1,12 @@
 /**
- * AL FAKHAMA (HARV FRIES) - Bilingual Engine (EN / AR)
+ * AL FAKHAMA - Bilingual Engine (EN / AR)
  */
 
 const translations = {
   en: {
     // Nav
     brandName: "AL FAKHAMA",
-    brandTagline: "HARV FRIES • FROZEN POTATOES",
+    brandTagline: "PREMIUM FROZEN POTATOES & VEGETABLES",
     navHome: "Home",
     navAbout: "About Us",
     navProducts: "Products",
@@ -256,8 +256,8 @@ const translations = {
     gal3Tag: "Raw Materials",
     gal4Title: "9x9mm Classic Cut",
     gal4Tag: "Frozen Product",
-    gal5Title: "Export Barrier Packaging",
-    gal5Tag: "Packaging & Logistics",
+    gal5Title: "Crinkle Cut & Seasoned Wedges",
+    gal5Tag: "Frozen Product",
     gal6Title: "12x12mm Thick Cut Fries",
     gal6Tag: "Frozen Product",
 
@@ -311,11 +311,11 @@ const translations = {
     optQty4: "Custom Commercial Volume",
 
     // Footer
-    footerDesc: "Al Fakhama (HARV FRIES) is a dedicated manufacturer of premium frozen par-fried French fries, serving global food service operators, hotel chains, and wholesale distributors.",
+    footerDesc: "Al Fakhama is a dedicated manufacturer of premium frozen par-fried French fries, serving global food service operators, hotel chains, and wholesale distributors.",
     footerNavTitle: "Quick Navigation",
     footerProdTitle: "Our Products",
     footerContactTitle: "Commercial Inquiries",
-    footerRights: "© 2026 Al Fakhama (HARV FRIES). All rights reserved.",
+    footerRights: "© 2026 Al Fakhama. All rights reserved.",
     footerPrivacy: "B2B Export Supplier",
     footerTerms: "Terms of Supply"
   },
@@ -323,7 +323,7 @@ const translations = {
   ar: {
     // Nav
     brandName: "شركة الفخامة",
-    brandTagline: "هارف فرايز • بطاطس نصف مقلية ومجمدة",
+    brandTagline: "بطاطس نصف مقلية وخضروات مجمدة للتصدير",
     navHome: "الرئيسية",
     navAbout: "عن الفخامة",
     navProducts: "منتجاتنا",
@@ -573,8 +573,8 @@ const translations = {
     gal3Tag: "المواد الخام",
     gal4Title: "بطاطس كلاسيك نصف مقلية 9×9 مم",
     gal4Tag: "المنتج المجمد",
-    gal5Title: "تعبئة كراتين التصدير المجمدة",
-    gal5Tag: "التعبئة واللوجستيات",
+    gal5Title: "بطاطس كرينكل وودجز متبلة",
+    gal5Tag: "المنتج المجمد",
     gal6Title: "بطاطس عريضة نصف مقلية 12×12 مم",
     gal6Tag: "المنتج المجمد",
 
@@ -628,11 +628,11 @@ const translations = {
     optQty4: "كمية تجارية مخصصة",
 
     // Footer
-    footerDesc: "شركة الفخامة (هارف فرايز) مصنع متخصص في إنتاج وتجميد البطاطس النصف مقلية لخدمة قطاعات الضيافة، والمطاعم، وتجار الجملة والتصدير.",
+    footerDesc: "شركة الفخامة مصنع متخصص في إنتاج وتجميد البطاطس النصف مقلية لخدمة قطاعات الضيافة، والمطاعم، وتجار الجملة والتصدير.",
     footerNavTitle: "روابط سريعة",
     footerProdTitle: "المنتجات",
     footerContactTitle: "المبيعات والتوريد",
-    footerRights: "© 2026 شركة الفخامة (HARV FRIES). جميع الحقوق محفوظة.",
+    footerRights: "© 2026 شركة الفخامة. جميع الحقوق محفوظة.",
     footerPrivacy: "مورد ومصنع تصدير B2B",
     footerTerms: "شروط التوريد التجاري"
   }

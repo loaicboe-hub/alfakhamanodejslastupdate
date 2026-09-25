@@ -1,5 +1,5 @@
 /**
- * AL FAKHAMA (HARV FRIES) — ADMIN DASHBOARD JAVASCRIPT
+ * AL FAKHAMA — ADMIN DASHBOARD JAVASCRIPT
  * Full-featured SPA: Inquiries (MySQL), Categories, Products, General Settings
  */
 
@@ -243,7 +243,6 @@ const assetHealMap = {
   "cut_crinkle": "../assets/images/cut_crinkle_wedges.jpg",
   "crinkle": "../assets/images/cut_crinkle_wedges.jpg",
   "wedges": "../assets/images/cut_crinkle_wedges.jpg",
-  "packaging_bags": "../assets/images/packaging_bags.jpg",
   "strawberries": "../assets/images/frozen_strawberries.jpg",
   "mango": "../assets/images/frozen_mango.jpg"
 };
@@ -706,7 +705,7 @@ function filterAndRenderInquiries() {
       </td>
       <td>
         <div class="row-actions-group">
-          <a href="https://wa.me/${escapePhone(item.phone_whatsapp)}?text=${encodeURIComponent('Hello ' + item.full_name + ', thank you for your inquiry with Al Fakhama (HARV FRIES) regarding ' + item.product_cut + '. We are reviewing your requirements...')}" target="_blank" class="btn-admin btn-admin-sm btn-whatsapp" title="Reply on WhatsApp">
+          <a href="https://wa.me/${escapePhone(item.phone_whatsapp)}?text=${encodeURIComponent('Hello ' + item.full_name + ', thank you for your inquiry with Al Fakhama regarding ' + item.product_cut + '. We are reviewing your requirements...')}" target="_blank" class="btn-admin btn-admin-sm btn-whatsapp" title="Reply on WhatsApp">
             <span>WhatsApp</span>
           </a>
           <button type="button" class="btn-admin btn-admin-danger btn-admin-sm btn-delete-row" onclick="confirmDeleteInquiry(${item.id})" title="Delete Inquiry #${item.id}">
