@@ -39,12 +39,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function closeMobileMenu() {
-    if (mobileToggle) mobileToggle.classList.remove("active");
-    if (mobileDrawer) mobileDrawer.classList.remove("open");
-    if (drawerBackdrop) drawerBackdrop.classList.remove("active");
+    const toggle = document.getElementById("mobileMenuToggle") || mobileToggle;
+    const drawer = document.getElementById("mobileDrawer") || mobileDrawer;
+    const backdrop = document.getElementById("drawerBackdrop") || drawerBackdrop;
+    
+    if (toggle) toggle.classList.remove("active");
+    if (drawer) drawer.classList.remove("open");
+    if (backdrop) backdrop.classList.remove("active");
     document.body.classList.remove("menu-open");
     document.body.style.overflow = "";
   }
+
+  window.closeMobileMenu = closeMobileMenu;
+  window.toggleMobileMenu = toggleMobileMenu;
 
   if (mobileToggle) {
     mobileToggle.addEventListener("click", toggleMobileMenu);
