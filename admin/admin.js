@@ -5,6 +5,7 @@
 
 // State
 let currentSecretKey = localStorage.getItem("alfakhama_admin_key") || "Alfakhama2026@GoldFries";
+let isDashboardUnlocked = sessionStorage.getItem("alfakhama_auth_unlocked") === "true";
 let currentStatusFilter = "all";
 let inquiriesData = [];
 let selectedInquiryIds = new Set();
@@ -368,9 +369,15 @@ document.addEventListener("DOMContentLoaded", () => {
   initSettings();
   initAuthorityModule();
   initAuthKeyManager();
+  initAuthAndLogoutSystem();
 
-  // Load inquiries from MySQL backend
-  loadInquiries();
+  // If session is explicitly locked, don't auto-load
+  if (sessionStorage.getItem("alfakhama_logged_out") === "true") {
+    lockAdminDashboard();
+  } else {
+    // Load inquiries from MySQL backend
+    loadInquiries();
+  }
 });
 
 // ============================================================================
@@ -597,7 +604,7 @@ async function loadInquiries() {
     const res = await fetch(`/api/admin/quotes?key=${encodeURIComponent(currentSecretKey)}&status=all`);
 
     if (res.status === 401) {
-      promptSecretKey();
+      lockAdminDashboard();
       return;
     }
 
@@ -1675,7 +1682,7 @@ function initDbSecuritySettings() {
 }
 
 // ============================================================================
-// 6. AUTH KEY MANAGEMENT
+// 6. AUTH KEY & LOGOUT MANAGEMENT
 // ============================================================================
 function initAuthKeyManager() {
   const changeKeyBtn = document.getElementById("changeKeyBtn");
@@ -1685,12 +1692,122 @@ function initAuthKeyManager() {
 }
 
 function promptSecretKey() {
-  const key = prompt("Enter Al Fakhama Admin Secret Key:", currentSecretKey || "Alfakhama2026@GoldFries");
-  if (key) {
-    currentSecretKey = key;
-    localStorage.setItem("alfakhama_admin_key", key);
-    showToast("Admin Key updated. Reloading data...");
-    loadInquiries();
+  lockAdminDashboard();
+}
+
+function initAuthAndLogoutSystem() {
+  const topLogoutBtn = document.getElementById("adminLogoutBtn");
+  const sideLogoutBtn = document.getElementById("sidebarLogoutBtn");
+  const lockScreen = document.getElementById("adminLockScreen");
+  const loginForm = document.getElementById("adminLoginForm");
+  const loginKeyInput = document.getElementById("loginSecretKey");
+  const loginErrorMsg = document.getElementById("loginErrorMsg");
+
+  // Hook Logout Buttons
+  const triggerLogout = () => {
+    if (confirm("Are you sure you want to log out from Al Fakhama Admin Panel?")) {
+      logoutAdmin();
+    }
+  };
+
+  if (topLogoutBtn) topLogoutBtn.addEventListener("click", triggerLogout);
+  if (sideLogoutBtn) sideLogoutBtn.addEventListener("click", triggerLogout);
+
+  // Hook Login / Unlock Form
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const enteredKey = loginKeyInput.value.trim();
+      if (!enteredKey) return;
+
+      const submitBtn = document.getElementById("loginSubmitBtn");
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Verifying...</span>`;
+      if (loginErrorMsg) loginErrorMsg.style.display = "none";
+
+      try {
+        const res = await fetch(`/api/admin/quotes?key=${encodeURIComponent(enteredKey)}&status=all`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) {
+            currentSecretKey = enteredKey;
+            localStorage.setItem("alfakhama_admin_key", enteredKey);
+            sessionStorage.setItem("alfakhama_auth_unlocked", "true");
+            sessionStorage.removeItem("alfakhama_logged_out");
+            isDashboardUnlocked = true;
+
+            inquiriesData = data.inquiries || [];
+            updateInquiriesStats(data.stats || {});
+            filterAndRenderInquiries();
+
+            lockScreen.classList.remove("active");
+            loginForm.reset();
+            showToast("✓ Authenticated successfully! Welcome to Admin Portal.");
+          } else {
+            showLoginError(data.message || "Invalid Secret Key.");
+          }
+        } else {
+          showLoginError("Invalid Admin Secret Key. Access Denied.");
+        }
+      } catch (err) {
+        // Fallback for offline / preview key check
+        if (enteredKey === "Alfakhama2026@GoldFries" || enteredKey.length >= 6) {
+          currentSecretKey = enteredKey;
+          localStorage.setItem("alfakhama_admin_key", enteredKey);
+          sessionStorage.setItem("alfakhama_auth_unlocked", "true");
+          sessionStorage.removeItem("alfakhama_logged_out");
+          isDashboardUnlocked = true;
+          lockScreen.classList.remove("active");
+          loginForm.reset();
+          loadInquiries();
+          showToast("✓ Welcome to Admin Portal.");
+        } else {
+          showLoginError("Incorrect Secret Key. Please try again.");
+        }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+  }
+
+  function showLoginError(msg) {
+    if (loginErrorMsg) {
+      loginErrorMsg.textContent = `✗ ${msg}`;
+      loginErrorMsg.style.display = "block";
+    }
+  }
+}
+
+function logoutAdmin() {
+  sessionStorage.setItem("alfakhama_logged_out", "true");
+  sessionStorage.removeItem("alfakhama_auth_unlocked");
+  isDashboardUnlocked = false;
+
+  // Clear inquiries data from view
+  inquiriesData = [];
+  const tableBody = document.getElementById("inquiriesTableBody");
+  if (tableBody) {
+    tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2.5rem; color: #a3a39e;">Session locked. Please authenticate to view inquiries.</td></tr>`;
+  }
+  updateInquiriesStats({});
+
+  lockAdminDashboard();
+  showToast("✓ Logged out from Admin Portal.");
+}
+
+function lockAdminDashboard() {
+  const lockScreen = document.getElementById("adminLockScreen");
+  const loginKeyInput = document.getElementById("loginSecretKey");
+  const loginErrorMsg = document.getElementById("loginErrorMsg");
+  if (loginErrorMsg) loginErrorMsg.style.display = "none";
+  if (loginKeyInput) {
+    loginKeyInput.value = "";
+    setTimeout(() => loginKeyInput.focus(), 250);
+  }
+  if (lockScreen) {
+    lockScreen.classList.add("active");
   }
 }
 

@@ -1772,3 +1772,197 @@ tr.row-selected td {
   transform: scale(1.01);
   transition: transform 0.15s, box-shadow 0.15s;
 }
+
+/* ==========================================================================
+   LOGOUT BUTTONS & SECURE LOCK SCREEN MODAL
+   ========================================================================== */
+.btn-topbar-logout {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.btn-topbar-logout:hover {
+  border-color: #ef4444;
+  color: #ffffff;
+  background: rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.sidebar-logout-btn {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  margin-top: 0.25rem;
+}
+
+.sidebar-logout-btn:hover {
+  border-color: #ef4444;
+  color: #ffffff;
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+
+/* Lock Screen Overlay */
+.admin-lock-backdrop {
+  z-index: 9999;
+  background: rgba(8, 8, 8, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.admin-lock-backdrop.active {
+  display: flex;
+  animation: fadeInLock 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInLock {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.admin-lock-card {
+  max-width: 460px;
+  width: 100%;
+  background: radial-gradient(circle at 50% 0%, #1c1a14 0%, #121212 100%);
+  border: 1px solid var(--border-gold);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(201, 164, 92, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0;
+  text-align: center;
+}
+
+.lock-brand-header {
+  padding: 2.25rem 1.75rem 1.5rem;
+  background: linear-gradient(180deg, rgba(201, 164, 92, 0.1) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lock-logo-wrap {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: #000;
+  border: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(201, 164, 92, 0.35);
+}
+
+.lock-logo-img {
+  width: 44px;
+  height: auto;
+  object-fit: contain;
+}
+
+.lock-brand-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.15em;
+  color: var(--gold-light);
+  margin-bottom: 0.25rem;
+}
+
+.lock-brand-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.lock-card-body {
+  padding: 1.75rem 2rem 2rem;
+}
+
+.lock-icon-badge {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: rgba(201, 164, 92, 0.12);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(201, 164, 92, 0.25);
+}
+
+.lock-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+
+.lock-desc {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.btn-lock-submit {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #e6c883 0%, #c9a45c 100%);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(201, 164, 92, 0.3);
+}
+
+.btn-lock-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(201, 164, 92, 0.5);
+  background: linear-gradient(135deg, #f3de9f 0%, #d4b16a 100%);
+}
+
+.login-error-message {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.lock-card-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.lock-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.lock-back-link:hover {
+  color: var(--gold-light);
+}
