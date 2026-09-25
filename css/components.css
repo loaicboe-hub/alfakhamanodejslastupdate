@@ -471,15 +471,28 @@ html[dir="rtl"] .mobile-subnav {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(201, 164, 92, 0.3);
   color: var(--gold-light);
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  pointer-events: auto !important;
   transition: all var(--transition-fast);
+}
+
+.mobile-drawer-close-btn svg,
+.mobile-drawer-close-btn line {
+  pointer-events: none;
 }
 
 .mobile-drawer-close-btn:hover,

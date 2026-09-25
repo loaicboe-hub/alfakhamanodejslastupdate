@@ -51,7 +51,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (closeMobileDrawerBtn) {
-    closeMobileDrawerBtn.addEventListener("click", closeMobileMenu);
+    const handleDrawerClose = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      closeMobileMenu();
+    };
+    closeMobileDrawerBtn.addEventListener("click", handleDrawerClose);
+    closeMobileDrawerBtn.addEventListener("touchend", handleDrawerClose, { passive: false });
   }
 
   if (drawerBackdrop) {
