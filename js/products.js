@@ -437,6 +437,10 @@ function applyProductFilters() {
   if (isFirstFilterRun) {
     isFirstFilterRun = false;
     updateCardVisibility();
+    if (grid) {
+      grid.classList.remove("filtering");
+      grid.style.opacity = "1";
+    }
     return;
   }
 
@@ -598,6 +602,11 @@ function openSpecsModal(productId) {
 document.addEventListener("DOMContentLoaded", () => {
   applyAdminProductOrder();
   initProducts();
+  const grid = document.querySelector(".products-grid");
+  if (grid) {
+    grid.classList.remove("filtering");
+    grid.style.opacity = "1";
+  }
 });
 
 window.addEventListener("languageChanged", () => {
