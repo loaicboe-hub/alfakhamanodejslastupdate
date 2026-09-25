@@ -66,16 +66,22 @@
 
 [dir="rtl"] .gold-corner-frame::after {
   right: auto;
-  left: -6px;
+  left: 0;
   border-right: none;
-  border-left: 2px solid var(--gold-pure);
+  border-left: 3px solid var(--gold-pure);
+  border-top-left-radius: 4px;
+  border-top-right-radius: 0;
+  box-shadow: -2px -2px 8px rgba(201, 164, 92, 0.35);
 }
 
 [dir="rtl"] .gold-corner-frame::before {
   left: auto;
-  right: -6px;
+  right: 0;
   border-left: none;
-  border-right: 2px solid var(--gold-pure);
+  border-right: 3px solid var(--gold-pure);
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 0;
+  box-shadow: 2px 2px 8px rgba(201, 164, 92, 0.35);
 }
 
 [dir="rtl"] .footer-col-title::after {

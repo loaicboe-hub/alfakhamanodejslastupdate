@@ -381,7 +381,7 @@ img {
   opacity: 1;
 }
 
-/* Decorative Gold Corner Borders */
+/* Decorative Gold Corner Borders (100% accurate flush frame) */
 .gold-corner-frame {
   position: relative;
 }
@@ -389,25 +389,31 @@ img {
 .gold-corner-frame::after {
   content: "";
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 24px;
-  height: 24px;
-  border-top: 2px solid var(--gold-pure);
-  border-right: 2px solid var(--gold-pure);
+  top: 0;
+  right: 0;
+  width: 26px;
+  height: 26px;
+  border-top: 3px solid var(--gold-pure);
+  border-right: 3px solid var(--gold-pure);
+  border-top-right-radius: 4px;
   pointer-events: none;
+  z-index: 5;
+  box-shadow: 2px -2px 8px rgba(201, 164, 92, 0.35);
 }
 
 .gold-corner-frame::before {
   content: "";
   position: absolute;
-  bottom: -6px;
-  left: -6px;
-  width: 24px;
-  height: 24px;
-  border-bottom: 2px solid var(--gold-pure);
-  border-left: 2px solid var(--gold-pure);
+  bottom: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  border-bottom: 3px solid var(--gold-pure);
+  border-left: 3px solid var(--gold-pure);
+  border-bottom-left-radius: 4px;
   pointer-events: none;
+  z-index: 5;
+  box-shadow: -2px 2px 8px rgba(201, 164, 92, 0.35);
 }
 
 /* ==========================================================================
