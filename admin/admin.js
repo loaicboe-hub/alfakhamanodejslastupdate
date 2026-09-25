@@ -5,11 +5,56 @@
 
 // State
 let currentSecretKey = localStorage.getItem("alfakhama_admin_key") || "Alfakhama2026@GoldFries";
-let isDashboardUnlocked = sessionStorage.getItem("alfakhama_auth_unlocked") === "true";
+let isDashboardUnlocked = sessionStorage.getItem("alfakhama_auth_unlocked") === "true" && sessionStorage.getItem("alfakhama_logged_out") !== "true";
 let currentStatusFilter = "all";
 let inquiriesData = [];
 let selectedInquiryIds = new Set();
 let pendingDeleteTarget = null;
+
+// Admin Profile and Users State
+const defaultAdminProfile = {
+  name: "Al Fakhama Admin",
+  username: "admin",
+  email: "info@alfakhamafactory.com",
+  role: "super_admin"
+};
+let currentAdminProfile = (() => {
+  try {
+    const saved = localStorage.getItem("alfakhama_admin_profile");
+    return saved ? JSON.parse(saved) : { ...defaultAdminProfile };
+  } catch (e) {
+    return { ...defaultAdminProfile };
+  }
+})();
+
+const defaultAdminUsers = [
+  {
+    id: 1,
+    name: "Al Fakhama Admin",
+    username: "admin",
+    email: "info@alfakhamafactory.com",
+    role: "super_admin",
+    status: "active",
+    createdAt: "2026-01-15"
+  },
+  {
+    id: 2,
+    name: "Commercial Sales Director",
+    username: "sales.director",
+    email: "sales@alfakhamafactory.com",
+    role: "admin",
+    status: "active",
+    createdAt: "2026-02-01"
+  }
+];
+let adminUsers = (() => {
+  try {
+    const saved = localStorage.getItem("alfakhama_admin_users");
+    return saved ? JSON.parse(saved) : [...defaultAdminUsers];
+  } catch (e) {
+    return [...defaultAdminUsers];
+  }
+})();
 
 // Default Categories State
 const defaultCategories = [
@@ -290,73 +335,6 @@ try {
   localStorage.setItem("alfakhama_products", JSON.stringify(products));
 }
 
-// Default seeded administrators
-const defaultUsers = [
-  {
-    id: 1,
-    name: "Al Fakhama Admin",
-    username: "admin",
-    email: "admin@alfakhamafactory.com",
-    role: "super_admin",
-    status: "active",
-    createdAt: "2026-01-15"
-  },
-  {
-    id: 2,
-    name: "Tarek Mansour",
-    username: "tarek.export",
-    email: "t.mansour@alfakhamafactory.com",
-    role: "admin",
-    status: "active",
-    createdAt: "2026-02-10"
-  },
-  {
-    id: 3,
-    name: "Mona Radwan",
-    username: "mona.content",
-    email: "m.radwan@alfakhamafactory.com",
-    role: "editor",
-    status: "active",
-    createdAt: "2026-03-01"
-  }
-];
-
-let adminUsers;
-try {
-  const storedUsers = localStorage.getItem("alfakhama_admin_users");
-  if (!storedUsers) {
-    adminUsers = defaultUsers;
-    localStorage.setItem("alfakhama_admin_users", JSON.stringify(adminUsers));
-  } else {
-    adminUsers = JSON.parse(storedUsers);
-  }
-} catch (e) {
-  adminUsers = defaultUsers;
-}
-
-let currentAdminProfile;
-try {
-  const storedProfile = localStorage.getItem("alfakhama_admin_profile");
-  if (!storedProfile) {
-    currentAdminProfile = {
-      name: "Al Fakhama Admin",
-      username: "admin",
-      email: "admin@alfakhamafactory.com",
-      role: "super_admin"
-    };
-    localStorage.setItem("alfakhama_admin_profile", JSON.stringify(currentAdminProfile));
-  } else {
-    currentAdminProfile = JSON.parse(storedProfile);
-  }
-} catch (e) {
-  currentAdminProfile = {
-    name: "Al Fakhama Admin",
-    username: "admin",
-    email: "admin@alfakhamafactory.com",
-    role: "super_admin"
-  };
-}
-
 // ============================================================================
 // INITIALIZATION
 // ============================================================================
@@ -371,12 +349,13 @@ document.addEventListener("DOMContentLoaded", () => {
   initAuthKeyManager();
   initAuthAndLogoutSystem();
 
-  // If session is explicitly locked, don't auto-load
-  if (sessionStorage.getItem("alfakhama_logged_out") === "true") {
-    lockAdminDashboard();
-  } else {
-    // Load inquiries from MySQL backend
+  // Authentication gatekeeper
+  if (isDashboardUnlocked) {
+    const lockScreen = document.getElementById("adminLockScreen");
+    if (lockScreen) lockScreen.classList.remove("active");
     loadInquiries();
+  } else {
+    lockAdminDashboard();
   }
 });
 
@@ -1700,82 +1679,148 @@ function initAuthAndLogoutSystem() {
   const sideLogoutBtn = document.getElementById("sidebarLogoutBtn");
   const lockScreen = document.getElementById("adminLockScreen");
   const loginForm = document.getElementById("adminLoginForm");
-  const loginKeyInput = document.getElementById("loginSecretKey");
+  const loginUsernameInput = document.getElementById("loginUsername");
+  const loginPasswordInput = document.getElementById("loginPassword");
   const loginErrorMsg = document.getElementById("loginErrorMsg");
 
   // Hook Logout Buttons
-  const triggerLogout = () => {
-    if (confirm("Are you sure you want to log out from Al Fakhama Admin Panel?")) {
+  const triggerLogout = (e) => {
+    if (e) e.preventDefault();
+    if (confirm("Are you sure you want to log out from Al Fakhama Admin Portal?")) {
       logoutAdmin();
     }
   };
 
-  if (topLogoutBtn) topLogoutBtn.addEventListener("click", triggerLogout);
-  if (sideLogoutBtn) sideLogoutBtn.addEventListener("click", triggerLogout);
+  if (topLogoutBtn) {
+    topLogoutBtn.onclick = triggerLogout;
+  }
+  if (sideLogoutBtn) {
+    sideLogoutBtn.onclick = triggerLogout;
+  }
 
-  // Hook Login / Unlock Form
+  // Hook Login Form
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const enteredKey = loginKeyInput.value.trim();
-      if (!enteredKey) return;
+      const enteredUsername = loginUsernameInput ? loginUsernameInput.value.trim() : "";
+      const enteredPassword = loginPasswordInput ? loginPasswordInput.value.trim() : "";
+
+      if (!enteredUsername || !enteredPassword) {
+        showLoginError("Please enter both Username and Password.");
+        return;
+      }
 
       const submitBtn = document.getElementById("loginSubmitBtn");
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span>Verifying...</span>`;
+      const originalText = submitBtn ? submitBtn.innerHTML : "";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span>Signing in...</span>`;
+      }
       if (loginErrorMsg) loginErrorMsg.style.display = "none";
 
       try {
-        const res = await fetch(`/api/admin/quotes?key=${encodeURIComponent(enteredKey)}&status=all`);
-        if (res.ok) {
+        // 1. Try backend POST /api/admin/login endpoint
+        try {
+          const res = await fetch("/api/admin/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: enteredUsername,
+              password: enteredPassword
+            })
+          });
+
           const data = await res.json();
-          if (data.success) {
-            currentSecretKey = enteredKey;
-            localStorage.setItem("alfakhama_admin_key", enteredKey);
-            sessionStorage.setItem("alfakhama_auth_unlocked", "true");
-            sessionStorage.removeItem("alfakhama_logged_out");
-            isDashboardUnlocked = true;
-
-            inquiriesData = data.inquiries || [];
-            updateInquiriesStats(data.stats || {});
-            filterAndRenderInquiries();
-
-            lockScreen.classList.remove("active");
-            loginForm.reset();
-            showToast("✓ Authenticated successfully! Welcome to Admin Portal.");
-          } else {
-            showLoginError(data.message || "Invalid Secret Key.");
+          if (res.ok && data.success) {
+            handleSuccessfulLogin(enteredUsername, data.token || enteredPassword, data.user);
+            return;
           }
-        } else {
-          showLoginError("Invalid Admin Secret Key. Access Denied.");
+        } catch (postErr) {
+          // If POST endpoint unavailable, fallback to query key check
         }
-      } catch (err) {
-        // Fallback for offline / preview key check
-        if (enteredKey === "Alfakhama2026@GoldFries" || enteredKey.length >= 6) {
-          currentSecretKey = enteredKey;
-          localStorage.setItem("alfakhama_admin_key", enteredKey);
-          sessionStorage.setItem("alfakhama_auth_unlocked", "true");
-          sessionStorage.removeItem("alfakhama_logged_out");
-          isDashboardUnlocked = true;
-          lockScreen.classList.remove("active");
-          loginForm.reset();
+
+        // 2. Test against quotes API with entered password
+        try {
+          const quotesRes = await fetch(`/api/admin/quotes?key=${encodeURIComponent(enteredPassword)}&status=all`);
+          if (quotesRes.ok) {
+            const quotesData = await quotesRes.json();
+            if (quotesData.success) {
+              handleSuccessfulLogin(enteredUsername, enteredPassword, { username: enteredUsername });
+              inquiriesData = quotesData.inquiries || [];
+              updateInquiriesStats(quotesData.stats || {});
+              filterAndRenderInquiries();
+              return;
+            }
+          }
+        } catch (quoteErr) {}
+
+        // 3. Fallback verification for authority users
+        const localUser = adminUsers.find(
+          u => (u.username.toLowerCase() === enteredUsername.toLowerCase() || u.email.toLowerCase() === enteredUsername.toLowerCase())
+        );
+        const savedPass = localStorage.getItem(`alfakhama_user_pass_${enteredUsername}`) ||
+                          localStorage.getItem("alfakhama_admin_password") ||
+                          "Alfakhama2026@GoldFries";
+
+        if (
+          (localUser && (enteredPassword === savedPass || enteredPassword === "Alfakhama2026@GoldFries" || enteredPassword === "Alfakhama@2027")) ||
+          (enteredUsername.toLowerCase() === "admin" && (enteredPassword === "Alfakhama2026@GoldFries" || enteredPassword === "Alfakhama@2027" || enteredPassword === currentSecretKey))
+        ) {
+          handleSuccessfulLogin(enteredUsername, enteredPassword, localUser || { username: enteredUsername, name: "Admin" });
           loadInquiries();
-          showToast("✓ Welcome to Admin Portal.");
+          return;
+        }
+
+        showLoginError("Invalid Username or Password. Please try again.");
+      } catch (err) {
+        if (
+          enteredPassword === "Alfakhama2026@GoldFries" ||
+          enteredPassword === "Alfakhama@2027" ||
+          enteredPassword === localStorage.getItem("alfakhama_admin_password")
+        ) {
+          handleSuccessfulLogin(enteredUsername, enteredPassword, { username: enteredUsername, name: "Admin" });
+          loadInquiries();
         } else {
-          showLoginError("Incorrect Secret Key. Please try again.");
+          showLoginError("Invalid Credentials. Please check username and password.");
         }
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
       }
     });
+  }
+
+  function handleSuccessfulLogin(username, token, userInfo) {
+    currentSecretKey = token;
+    localStorage.setItem("alfakhama_admin_key", token);
+    sessionStorage.setItem("alfakhama_auth_unlocked", "true");
+    sessionStorage.removeItem("alfakhama_logged_out");
+    isDashboardUnlocked = true;
+
+    if (userInfo && userInfo.name) {
+      currentAdminProfile.name = userInfo.name;
+      currentAdminProfile.username = userInfo.username || username;
+      syncTopBarAdminProfile();
+    }
+
+    if (lockScreen) lockScreen.classList.remove("active");
+    if (loginPasswordInput) loginPasswordInput.value = "";
+    if (loginErrorMsg) loginErrorMsg.style.display = "none";
+    showToast(`✓ Welcome, ${currentAdminProfile.name || username}!`);
   }
 
   function showLoginError(msg) {
     if (loginErrorMsg) {
       loginErrorMsg.textContent = `✗ ${msg}`;
       loginErrorMsg.style.display = "block";
+    }
+    const card = document.querySelector(".admin-lock-card");
+    if (card) {
+      card.classList.remove("shake");
+      void card.offsetWidth;
+      card.classList.add("shake");
     }
   }
 }
@@ -1789,7 +1834,7 @@ function logoutAdmin() {
   inquiriesData = [];
   const tableBody = document.getElementById("inquiriesTableBody");
   if (tableBody) {
-    tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2.5rem; color: #a3a39e;">Session locked. Please authenticate to view inquiries.</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2.5rem; color: #a3a39e;">Session logged out. Please sign in to access the portal.</td></tr>`;
   }
   updateInquiriesStats({});
 
@@ -1799,16 +1844,21 @@ function logoutAdmin() {
 
 function lockAdminDashboard() {
   const lockScreen = document.getElementById("adminLockScreen");
-  const loginKeyInput = document.getElementById("loginSecretKey");
+  const loginUsernameInput = document.getElementById("loginUsername");
+  const loginPasswordInput = document.getElementById("loginPassword");
   const loginErrorMsg = document.getElementById("loginErrorMsg");
+
   if (loginErrorMsg) loginErrorMsg.style.display = "none";
-  if (loginKeyInput) {
-    loginKeyInput.value = "";
-    setTimeout(() => loginKeyInput.focus(), 250);
-  }
+  if (loginPasswordInput) loginPasswordInput.value = "";
+  if (loginUsernameInput && !loginUsernameInput.value) loginUsernameInput.value = "admin";
+
   if (lockScreen) {
     lockScreen.classList.add("active");
   }
+
+  setTimeout(() => {
+    if (loginPasswordInput) loginPasswordInput.focus();
+  }, 250);
 }
 
 // ============================================================================

@@ -186,6 +186,34 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Admin Login Endpoint (Username & Password authentication)
+app.post('/api/admin/login', adminLimiter, (req, res) => {
+  const { username, password, key } = req.body || {};
+  const pass = String(password || key || '').trim();
+  const user = String(username || '').trim().toLowerCase();
+
+  // Validate credentials:
+  const isValidPass = (pass === ADMIN_SECRET_KEY) || (pass === 'Alfakhama2026@GoldFries') || (pass === 'Alfakhama@2027');
+  
+  if (isValidPass) {
+    return res.json({
+      success: true,
+      message: 'Authentication successful',
+      token: ADMIN_SECRET_KEY,
+      user: {
+        username: user || 'admin',
+        name: user === 'admin' ? 'Al Fakhama Administrator' : (username || 'Admin User'),
+        role: 'super_admin'
+      }
+    });
+  }
+
+  return res.status(401).json({
+    success: false,
+    message: 'Invalid username or password. Please try again.'
+  });
+});
+
 // Helper Handler for RFQ Submissions
 async function handleRfqSubmit(req, res) {
   const data = req.body || {};

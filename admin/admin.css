@@ -1938,13 +1938,47 @@ tr.row-selected td {
 
 .login-error-message {
   margin-top: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.85rem;
   background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   color: #f87171;
-  font-size: 0.8rem;
-  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 6px;
   text-align: left;
+}
+
+.input-with-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-icon-wrap .input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--gold);
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.form-input-with-icon {
+  padding-left: 2.6rem !important;
+}
+
+.admin-lock-card.shake {
+  animation: shakeCard 0.4s ease-in-out;
+}
+
+@keyframes shakeCard {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
 }
 
 .lock-card-footer {
@@ -1966,3 +2000,4 @@ tr.row-selected td {
 .lock-back-link:hover {
   color: var(--gold-light);
 }
+

@@ -1679,7 +1679,7 @@
   </div>
 
   <!-- ========================================================================
-       ADMIN LOGIN & LOCK SCREEN MODAL
+       ADMIN LOGIN & AUTHENTICATION SCREEN
        ======================================================================== -->
   <div class="admin-modal-backdrop admin-lock-backdrop" id="adminLockScreen">
     <div class="admin-modal-card admin-lock-card">
@@ -1688,25 +1688,47 @@
           <img src="../assets/images/logo.png" alt="Al Fakhama Logo" class="lock-logo-img">
         </div>
         <h2 class="lock-brand-title">AL FAKHAMA</h2>
-        <span class="lock-brand-sub">HARV FRIES • SECURE ADMIN PORTAL</span>
+        <span class="lock-brand-sub">HARV FRIES • ADMIN CONTROL PORTAL</span>
       </div>
 
       <div class="lock-card-body">
         <div class="lock-icon-badge">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </div>
-        <h3 class="lock-title">Authentication Required</h3>
-        <p class="lock-desc">Please enter your Admin Secret Key or Administrator credentials to unlock the dashboard.</p>
+        <h3 class="lock-title">Admin Sign In</h3>
+        <p class="lock-desc">Enter your administrator username and password to access the management portal.</p>
 
         <form id="adminLoginForm" class="admin-modal-form">
-          <div class="form-group">
-            <label class="form-label" for="loginSecretKey">Admin Secret Key / Password</label>
-            <div class="password-input-group">
-              <input type="password" id="loginSecretKey" class="form-input" required placeholder="Enter Secret Key" autocomplete="current-password">
-              <button type="button" class="btn-toggle-pass" data-target="loginSecretKey" title="Show/Hide">👁️</button>
+          <div class="form-group" style="text-align: left; margin-bottom: 1.1rem;">
+            <label class="form-label" for="loginUsername">Username / Admin ID</label>
+            <div class="input-with-icon-wrap">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+              <input type="text" id="loginUsername" class="form-input form-input-with-icon" required placeholder="admin or email" autocomplete="username" value="admin">
+            </div>
+          </div>
+
+          <div class="form-group" style="text-align: left; margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <label class="form-label" for="loginPassword" style="margin-bottom: 0;">Password</label>
+              <span style="font-size: 0.76rem; color: var(--gold-light);">Protected System</span>
+            </div>
+            <div class="password-input-group input-with-icon-wrap">
+              <span class="input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <input type="password" id="loginPassword" class="form-input form-input-with-icon" required placeholder="Enter admin password" autocomplete="current-password">
+              <button type="button" class="btn-toggle-pass" data-target="loginPassword" title="Show/Hide Password" style="right: 10px;">👁️</button>
             </div>
             <div id="loginErrorMsg" class="login-error-message" style="display: none;"></div>
           </div>
@@ -1717,7 +1739,7 @@
               <polyline points="10 17 15 12 10 7"></polyline>
               <line x1="15" y1="12" x2="3" y2="12"></line>
             </svg>
-            <span>Unlock Dashboard</span>
+            <span>Sign In to Dashboard</span>
           </button>
         </form>
 
