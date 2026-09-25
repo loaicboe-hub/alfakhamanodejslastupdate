@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "deploy": "node scripts/deploy.js"
   },
   "keywords": [
     "alfakhama",
@@ -29,5 +30,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "basic-ftp": "^6.2.1"
   }
 }

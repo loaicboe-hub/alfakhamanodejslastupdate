@@ -1,0 +1,31 @@
+name: 🚀 Auto Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 🌐 FTPS Deploy to Hostinger
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install Dependencies
+        run: npm install
+
+      - name: 🚀 Run FTPS Deployment
+        env:
+          FTP_HOST: 147.79.103.106
+          FTP_USER: u128613351
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD || 'Alfakhama@2027' }}
+          FTP_REMOTE_DIR: domains/alfakhamafactory-com-480061.hostingersite.com/public_html
+        run: node scripts/deploy.js
