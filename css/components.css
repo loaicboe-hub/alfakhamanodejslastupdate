@@ -422,7 +422,7 @@ html[dir="rtl"] .mobile-subnav {
 }
 
 /* ==========================================================================
-   MOBILE DRAWER NAVIGATION - CLEAN RESPONSIVE
+   MOBILE DRAWER NAVIGATION - CLEAN RESPONSIVE SCROLLABLE
    ========================================================================== */
 .mobile-drawer {
   position: fixed;
@@ -430,24 +430,26 @@ html[dir="rtl"] .mobile-subnav {
   right: -100%;
   width: 88vw;
   max-width: 360px;
+  height: 100%;
   height: 100vh;
   height: 100dvh;
+  max-height: 100dvh;
   background: #0d0d0d;
   border-left: 1px solid var(--border-gold);
   z-index: 4000;
   box-shadow: -15px 0 45px rgba(0, 0, 0, 0.95);
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch !important;
   touch-action: pan-y !important;
   overscroll-behavior-y: contain;
+  overscroll-behavior: contain;
   transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
-  padding: 0.75rem 1.25rem 2.5rem;
+  padding: 0.75rem 1.25rem;
   padding-top: max(0.75rem, env(safe-area-inset-top));
-  padding-bottom: max(2.5rem, env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
+  padding-bottom: max(3.5rem, calc(env(safe-area-inset-bottom) + 2.5rem));
+  display: block;
 }
 
 .mobile-drawer.open {
@@ -559,9 +561,7 @@ html[dir="rtl"] .mobile-subnav {
 
 /* Scrollable Content Container */
 .mobile-drawer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  display: block;
   width: 100%;
   box-sizing: border-box;
 }
@@ -573,7 +573,7 @@ html[dir="rtl"] .mobile-subnav {
   flex-direction: column;
   gap: 0.5rem;
   padding: 0;
-  margin: 0;
+  margin: 0 0 1rem 0;
   width: 100%;
   box-sizing: border-box;
 }
@@ -685,6 +685,11 @@ html[dir="rtl"] .mobile-subnav {
 .drawer-backdrop.active {
   opacity: 1;
   pointer-events: auto;
+}
+
+body.menu-open {
+  overflow: hidden !important;
+  touch-action: none;
 }
 
 /* ==========================================================================
