@@ -98,12 +98,21 @@
 
   <!-- Mobile Drawer Menu -->
   <div class="drawer-backdrop" id="drawerBackdrop"></div>
-  <aside class="mobile-drawer" id="mobileDrawer">
-    <div>
+  <aside class="mobile-drawer" id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+    <div class="mobile-drawer-header">
       <a href="#hero" class="brand-logo" aria-label="Al Fakhama Home">
         <img src="assets/images/logo.png" alt="Al Fakhama Industrial Investment Logo"
           class="brand-logo-img mobile-logo-img">
       </a>
+      <button class="mobile-drawer-close-btn" id="closeMobileDrawer" aria-label="Close Mobile Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mobile-drawer-body">
       <ul class="mobile-nav-list">
         <li><a href="#hero" class="mobile-nav-link" data-i18n="navHome">Home</a></li>
         <li><a href="#about" class="mobile-nav-link" data-i18n="navAbout">About Us</a></li>
@@ -126,14 +135,15 @@
         <li><a href="#process" class="mobile-nav-link" data-i18n="navProcess">Our Process</a></li>
         <li><a href="#contact" class="mobile-nav-link" data-i18n="navContact">Contact</a></li>
       </ul>
-    </div>
-    <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.85rem;">
-      <button class="lang-switch-btn mobile-lang-switch-btn" aria-label="Switch Language"
-        style="width: 100%; justify-content: center; padding: 0.65rem 1rem;">
-        <img src="assets/images/flag_egypt.svg" alt="علم مصر" class="lang-flag-img">
-        <span class="lang-label" data-i18n="langBtn">العربية</span>
-      </button>
-      <a href="#contact" class="btn btn-gold" style="width: 100%;" data-i18n="navQuoteBtn">Request a Quote</a>
+
+      <div class="mobile-drawer-actions">
+        <button class="lang-switch-btn mobile-lang-switch-btn" aria-label="Switch Language"
+          title="تغيير اللغة / Switch Language">
+          <img src="assets/images/flag_egypt.svg" alt="علم مصر" class="lang-flag-img">
+          <span class="lang-label" data-i18n="langBtn">العربية</span>
+        </button>
+        <a href="#contact" class="btn btn-gold mobile-quote-btn" data-i18n="navQuoteBtn">Request a Quote</a>
+      </div>
     </div>
   </aside>
 

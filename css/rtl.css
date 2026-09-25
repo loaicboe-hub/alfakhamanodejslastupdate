@@ -135,6 +135,11 @@
   right: auto;
 }
 
+[dir="rtl"] .mobile-subnav {
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
 [dir="rtl"] .modal-close-btn {
   right: auto;
   left: 1.25rem;

@@ -18,23 +18,24 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll", handleScroll, { passive: true });
   handleScroll();
 
-  // Mobile Drawer Toggle
+  // Mobile Drawer Toggle & Close Handlers
   const mobileToggle = document.getElementById("mobileMenuToggle");
   const mobileDrawer = document.getElementById("mobileDrawer");
+  const closeMobileDrawerBtn = document.getElementById("closeMobileDrawer");
   const drawerBackdrop = document.getElementById("drawerBackdrop");
-  const mobileNavLinks = document.querySelectorAll(".mobile-nav-link");
+  const mobileLinks = document.querySelectorAll(".mobile-nav-link, .mobile-subnav-link, .mobile-quote-btn");
 
   function toggleMobileMenu() {
-    mobileToggle.classList.toggle("active");
-    mobileDrawer.classList.toggle("open");
-    drawerBackdrop.classList.toggle("active");
-    document.body.style.overflow = mobileDrawer.classList.contains("open") ? "hidden" : "";
+    if (mobileToggle) mobileToggle.classList.toggle("active");
+    if (mobileDrawer) mobileDrawer.classList.toggle("open");
+    if (drawerBackdrop) drawerBackdrop.classList.toggle("active");
+    document.body.style.overflow = mobileDrawer && mobileDrawer.classList.contains("open") ? "hidden" : "";
   }
 
   function closeMobileMenu() {
-    mobileToggle.classList.remove("active");
-    mobileDrawer.classList.remove("open");
-    drawerBackdrop.classList.remove("active");
+    if (mobileToggle) mobileToggle.classList.remove("active");
+    if (mobileDrawer) mobileDrawer.classList.remove("open");
+    if (drawerBackdrop) drawerBackdrop.classList.remove("active");
     document.body.style.overflow = "";
   }
 
@@ -42,12 +43,23 @@ document.addEventListener("DOMContentLoaded", () => {
     mobileToggle.addEventListener("click", toggleMobileMenu);
   }
 
+  if (closeMobileDrawerBtn) {
+    closeMobileDrawerBtn.addEventListener("click", closeMobileMenu);
+  }
+
   if (drawerBackdrop) {
     drawerBackdrop.addEventListener("click", closeMobileMenu);
   }
 
-  mobileNavLinks.forEach(link => {
+  mobileLinks.forEach(link => {
     link.addEventListener("click", closeMobileMenu);
+  });
+
+  // ESC key to close drawer
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && mobileDrawer && mobileDrawer.classList.contains("open")) {
+      closeMobileMenu();
+    }
   });
 
   // Scroll Reveal Animations with IntersectionObserver
