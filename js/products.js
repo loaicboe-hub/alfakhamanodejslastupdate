@@ -638,9 +638,20 @@ function normalizeProductImagePath(img) {
   return clean;
 }
 
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 /**
  * Synchronizes DOM product cards on the website homepage with admin-saved products
- * (updates images, titles, cut badges, specs, and reorders).
+ * (dynamically renders cards so that deleted products disappear, new products appear,
+ * and custom uploaded/preset images are immediately shown).
  */
 function syncAdminProducts() {
   try {
@@ -648,105 +659,138 @@ function syncAdminProducts() {
     if (!stored) return;
 
     const adminProducts = JSON.parse(stored);
-    if (!Array.isArray(adminProducts) || adminProducts.length === 0) return;
+    if (!Array.isArray(adminProducts)) return;
 
     const grid = document.querySelector(".products-grid");
     if (!grid) return;
 
-    const cards = Array.from(grid.querySelectorAll(".product-card"));
-    if (cards.length === 0) return;
+    if (adminProducts.length === 0) {
+      grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: #a3a39e;">No products found.</div>`;
+      return;
+    }
 
-    // Mapping keywords to dataCategory
+    const isArabic = document.documentElement.getAttribute("dir") === "rtl" || (typeof currentLang !== "undefined" && currentLang === "ar");
+
     const categoryKeywordMap = [
-      { keywords: ["shoestring", "7mm", "6mm"],         dataCategory: "shoestring", specKey: "shoestring-7mm" },
-      { keywords: ["classic", "9mm"],                   dataCategory: "classic", specKey: "classic-9mm" },
-      { keywords: ["thick", "steak", "12mm", "10mm", "12x12"], dataCategory: "thick", specKey: "thick-12mm" },
-      { keywords: ["crinkle chip", "crinkle chips", "chips", "شيبسي"], dataCategory: "crinkle-chips", specKey: "crinkle-chips" },
-      { keywords: ["crinkle", "wedge"],                 dataCategory: "crinkle-wedges", specKey: "crinkle-wedges" },
-      { keywords: ["mixed veg", "peas", "garden"],      dataCategory: "mixed-veg", specKey: "mixed-vegetables" },
-      { keywords: ["green bean"],                       dataCategory: "green-beans", specKey: "green-beans" },
-      { keywords: ["okra"],                             dataCategory: "okra", specKey: "okra-zero" },
-      { keywords: ["molokhia"],                         dataCategory: "molokhia", specKey: "molokhia" },
-      { keywords: ["strawberr"],                        dataCategory: "strawberries", specKey: "egyptian-strawberries" },
-      { keywords: ["mango"],                            dataCategory: "mango", specKey: "mango-chunks" },
+      { keywords: ["shoestring", "7mm", "6mm"],         dataCategory: "shoestring", specKey: "shoestring-7mm", titleI18n: "prod1Title", descI18n: "prod1Desc", cutI18n: "prod1Cut", typeI18n: "prod1Type" },
+      { keywords: ["classic", "9mm"],                   dataCategory: "classic", specKey: "classic-9mm", titleI18n: "prod2Title", descI18n: "prod2Desc", cutI18n: "prod2Cut", typeI18n: "prod2Type" },
+      { keywords: ["thick", "steak", "12mm", "10mm", "12x12"], dataCategory: "thick", specKey: "thick-12mm", titleI18n: "prod3Title", descI18n: "prod3Desc", cutI18n: "prod3Cut", typeI18n: "prod3Type" },
+      { keywords: ["crinkle chip", "crinkle chips", "chips", "شيبسي"], dataCategory: "crinkle-chips", specKey: "crinkle-chips", titleI18n: "prodCrinkleChipsTitle", descI18n: "prodCrinkleChipsDesc", cutI18n: "prodCrinkleChipsCut", typeI18n: "prodCrinkleChipsType" },
+      { keywords: ["crinkle", "wedge"],                 dataCategory: "crinkle-wedges", specKey: "crinkle-wedges", titleI18n: "prodCrinkleTitle", descI18n: "prodCrinkleDesc", cutI18n: "prodCrinkleCut", typeI18n: "prodCrinkleType" },
+      { keywords: ["mixed veg", "peas", "garden"],      dataCategory: "mixed-veg", specKey: "mixed-vegetables", titleI18n: "prod4Title", descI18n: "prod4Desc", cutI18n: "prod4Cut", typeI18n: "prod4Type" },
+      { keywords: ["green bean", "فاصوليا"],            dataCategory: "green-beans", specKey: "green-beans", titleI18n: "prodGreenBeansTitle", descI18n: "prodGreenBeansDesc", cutI18n: "prodGreenBeansCut", typeI18n: "prodGreenBeansType" },
+      { keywords: ["okra", "بامية"],                    dataCategory: "okra", specKey: "okra-zero", titleI18n: "prodOkraTitle", descI18n: "prodOkraDesc", cutI18n: "prodOkraCut", typeI18n: "prodOkraType" },
+      { keywords: ["molokhia", "ملوخية"],                dataCategory: "molokhia", specKey: "molokhia", titleI18n: "prodMolokhiaTitle", descI18n: "prodMolokhiaDesc", cutI18n: "prodMolokhiaCut", typeI18n: "prodMolokhiaType" },
+      { keywords: ["strawberr", "فراولة"],               dataCategory: "strawberries", specKey: "egyptian-strawberries", titleI18n: "prodStrawberriesTitle", descI18n: "prodStrawberriesDesc", cutI18n: "prodStrawberriesCut", typeI18n: "prodStrawberriesType" },
+      { keywords: ["mango", "مانجو"],                    dataCategory: "mango", specKey: "mango-chunks", titleI18n: "prodMangoTitle", descI18n: "prodMangoDesc", cutI18n: "prodMangoCut", typeI18n: "prodMangoType" }
     ];
 
-    // Build lookup: dataCategory -> card element
-    const cardMap = {};
-    cards.forEach(card => {
-      const cat = card.getAttribute("data-category");
-      if (cat) cardMap[cat] = card;
-    });
+    grid.innerHTML = adminProducts.map(prod => {
+      const isVeg = (prod.category || "Frozen Vegetables") === "Frozen Vegetables";
+      const parentCat = isVeg ? "frozen-vegetables" : "frozen-fruits";
+      const parentTagI18n = isVeg ? "optVegMain" : "optFruitsMain";
+      const parentTagLabel = isVeg ? (isArabic ? "الخضروات المجمدة" : "Frozen Vegetables") : (isArabic ? "الفواكه المجمدة" : "Frozen Fruits");
 
-    const reordered = [];
-
-    adminProducts.forEach(prod => {
       const nameLower = (prod.name || "").toLowerCase();
-      for (const { keywords, dataCategory, specKey } of categoryKeywordMap) {
-        if (keywords.some(kw => nameLower.includes(kw))) {
-          const card = cardMap[dataCategory];
-          if (card) {
-            // 1. Update Product Image on Home Page
-            if (prod.img) {
-              const imgEl = card.querySelector(".product-image-box img, .product-img-wrap img, img");
-              if (imgEl) {
-                const targetSrc = normalizeProductImagePath(prod.img);
-                imgEl.src = targetSrc;
-                if (prod.name) imgEl.alt = prod.name;
-              }
-            }
-
-            // 2. Update Cut Badge if customized
-            if (prod.cut) {
-              const cutBadge = card.querySelector(".product-cut-badge");
-              if (cutBadge && !cutBadge.hasAttribute("data-i18n")) {
-                cutBadge.textContent = prod.cut;
-              }
-            }
-
-            // 3. Update Specs Table on the card
-            const specTable = card.querySelector(".product-spec-table");
-            if (specTable) {
-              const rows = specTable.querySelectorAll("tr");
-              rows.forEach(row => {
-                const tdLabel = row.querySelector("td:first-child");
-                const tdVal = row.querySelector("td:last-child");
-                if (!tdLabel || !tdVal) return;
-                const labelText = tdLabel.textContent.toLowerCase();
-                if (labelText.includes("cut") && prod.cut && !tdVal.hasAttribute("data-i18n")) tdVal.textContent = prod.cut;
-                if ((labelText.includes("state") || labelText.includes("processing")) && prod.type && !tdVal.hasAttribute("data-i18n")) tdVal.textContent = prod.type;
-                if (labelText.includes("storage") && prod.storage && !tdVal.hasAttribute("data-i18n")) tdVal.textContent = prod.storage;
-              });
-            }
-
-            // 4. Update Technical Specs Modal Data
-            if (specKey && productSpecsData[specKey]) {
-              const currentL = (typeof currentLang !== "undefined" && currentLang) ? currentLang : "en";
-              if (productSpecsData[specKey][currentL]) {
-                if (prod.cut) productSpecsData[specKey][currentL].cut = prod.cut;
-                if (prod.type) productSpecsData[specKey][currentL].type = prod.type;
-                if (prod.fryTime) productSpecsData[specKey][currentL].fryTime = prod.fryTime;
-                if (prod.storage) productSpecsData[specKey][currentL].storage = prod.storage;
-                if (prod.pkg) productSpecsData[specKey][currentL].packaging = prod.pkg;
-              }
-            }
-
-            if (!reordered.includes(card)) {
-              reordered.push(card);
-            }
-            break;
-          }
+      let matched = null;
+      for (const item of categoryKeywordMap) {
+        if (item.keywords.some(kw => nameLower.includes(kw))) {
+          matched = item;
+          break;
         }
       }
-    });
 
-    // Append any unmatched cards to preserve all cards
-    cards.forEach(card => {
-      if (!reordered.includes(card)) reordered.push(card);
-    });
+      const dataCat = matched ? matched.dataCategory : (isVeg ? "shoestring" : "strawberries");
+      const specKey = matched ? matched.specKey : `custom-spec-${prod.id}`;
+      const imgSrc = normalizeProductImagePath(prod.img);
+      const cutBadge = prod.cut || "";
 
-    // Apply reordered list to the DOM grid
-    reordered.forEach(card => grid.appendChild(card));
+      // Ensure modal specs dictionary is populated for this product
+      if (!productSpecsData[specKey]) {
+        productSpecsData[specKey] = {
+          en: {
+            title: prod.name,
+            cut: prod.cut || "Standard Cut",
+            type: prod.type || "Par-Fried / IQF",
+            fryTime: prod.fryTime || "2.5 - 3.5 min @ 175°C",
+            ingredients: "Selected Produce, Pure Vegetable Oil",
+            freezing: "Individually Quick Frozen (IQF) at -35°C",
+            storage: prod.storage || "-18°C (0°F) or colder",
+            packaging: prod.pkg || "Standard Export Packaging",
+            yield: "High plate yield, premium foodservice presentation",
+            description: prod.desc || prod.name
+          },
+          ar: {
+            title: prod.name,
+            cut: prod.cut || "تقطيع قياسي",
+            type: prod.type || "نصف مقلية / مجمدة بتقنية IQF",
+            fryTime: prod.fryTime || "2.5 - 3.5 دقائق على 175°م",
+            ingredients: "محاصيل ممتازة منتقاة، زيوت نباتية نقية",
+            freezing: "تجميد فردي سريع IQF عند -35°م",
+            storage: prod.storage || "حفظ مجمد عند -18°م أو أقل",
+            packaging: prod.pkg || "تعبئة وكراتين تصدير حسب المواصفات",
+            yield: "مردود عالي ومظهر فاخر في التقديم",
+            description: prod.desc || prod.name
+          }
+        };
+      } else {
+        if (productSpecsData[specKey].en) {
+          if (prod.cut) productSpecsData[specKey].en.cut = prod.cut;
+          if (prod.type) productSpecsData[specKey].en.type = prod.type;
+          if (prod.fryTime) productSpecsData[specKey].en.fryTime = prod.fryTime;
+          if (prod.storage) productSpecsData[specKey].en.storage = prod.storage;
+          if (prod.pkg) productSpecsData[specKey].en.packaging = prod.pkg;
+        }
+        if (productSpecsData[specKey].ar) {
+          if (prod.cut) productSpecsData[specKey].ar.cut = prod.cut;
+          if (prod.type) productSpecsData[specKey].ar.type = prod.type;
+          if (prod.fryTime) productSpecsData[specKey].ar.fryTime = prod.fryTime;
+          if (prod.storage) productSpecsData[specKey].ar.storage = prod.storage;
+          if (prod.pkg) productSpecsData[specKey].ar.packaging = prod.pkg;
+        }
+      }
+
+      const titleI18nAttr = matched ? `data-i18n="${matched.titleI18n}"` : "";
+      const descI18nAttr  = matched ? `data-i18n="${matched.descI18n}"` : "";
+      const cutI18nAttr   = matched ? `data-i18n="${matched.cutI18n}"` : "";
+      const typeI18nAttr  = matched ? `data-i18n="${matched.typeI18n}"` : "";
+
+      return `
+        <article class="product-card is-visible" data-parent-category="${parentCat}" data-category="${dataCat}" data-prod-id="${prod.id}">
+          <div class="product-image-box">
+            <img src="${imgSrc}" alt="${escapeHtml(prod.name)}" loading="eager" decoding="async" onerror="this.onerror=null; this.src='assets/images/cut_classic_9mm.jpg';">
+            <span class="product-cut-badge">${escapeHtml(cutBadge)}</span>
+            <span class="product-parent-tag" data-i18n="${parentTagI18n}">${parentTagLabel}</span>
+          </div>
+          <div class="product-info">
+            <h3 class="product-title" ${titleI18nAttr}>${escapeHtml(prod.name)}</h3>
+            <p class="product-desc" ${descI18nAttr}>${escapeHtml(prod.desc)}</p>
+
+            <table class="product-spec-table">
+              <tr>
+                <td>Cut Profile:</td>
+                <td ${cutI18nAttr}>${escapeHtml(prod.cut || "Custom")}</td>
+              </tr>
+              <tr>
+                <td>State:</td>
+                <td ${typeI18nAttr}>${escapeHtml(prod.type || "IQF Par-Fried")}</td>
+              </tr>
+              <tr>
+                <td>Storage:</td>
+                <td>${escapeHtml(prod.storage || "-18°C Frozen")}</td>
+              </tr>
+            </table>
+
+            <div class="product-actions">
+              <button class="btn btn-outline btn-view-specs" data-product-id="${specKey}" data-i18n="btnViewSpecs">${isArabic ? "عرض المواصفات الفنية" : "View Specifications"}</button>
+              <a href="#contact" class="btn btn-gold" data-i18n="btnInquire">${isArabic ? "طلب عرض أسعار" : "Inquire Now"}</a>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    applyProductFilters();
   } catch (e) {
     console.warn("syncAdminProducts error:", e);
   }
