@@ -737,17 +737,27 @@ function toggleLanguage() {
 }
 
 async function fetchServerContent() {
-  try {
-    const res = await fetch("/api/content");
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success && data.content && (data.content.en || data.content.ar)) {
-        localStorage.setItem("alfakhama_custom_content", JSON.stringify(data.content));
-        loadCustomContent();
-        setLanguage(currentLang);
+  const endpoints = [
+    `api/content.php?v=${Date.now()}`,
+    `/api/content?v=${Date.now()}`,
+    `database/content.json?v=${Date.now()}`
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const content = data && data.content ? data.content : data;
+        if (content && (content.en || content.ar)) {
+          localStorage.setItem("alfakhama_custom_content", JSON.stringify(content));
+          loadCustomContent();
+          setLanguage(currentLang);
+          return;
+        }
       }
-    }
-  } catch (err) {}
+    } catch (err) {}
+  }
 }
 
 // Expose translations globally for admin CMS synchronization

@@ -753,23 +753,34 @@ function syncAdminProducts() {
 }
 
 /**
- * Fetches server-stored products (/api/products) to ensure non-admin visitors
- * and cross-device sessions immediately reflect the latest pictures and catalog.
+ * Fetches server-stored products from API or static database JSON with cache-busting
+ * to ensure non-admin visitors and incognito sessions immediately reflect newly saved pictures and specs.
  */
 async function fetchServerProducts() {
-  try {
-    const res = await fetch("/api/products");
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
-        localStorage.setItem("alfakhama_products", JSON.stringify(data.products));
-        syncAdminProducts();
+  const endpoints = [
+    `api/products.php?v=${Date.now()}`,
+    `/api/products?v=${Date.now()}`,
+    `database/products.json?v=${Date.now()}`
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const prods = Array.isArray(data) ? data : (data && data.products ? data.products : null);
+        if (Array.isArray(prods) && prods.length > 0) {
+          localStorage.setItem("alfakhama_products", JSON.stringify(prods));
+          syncAdminProducts();
+          return;
+        }
       }
+    } catch (err) {
+      // Try next fallback endpoint
     }
-  } catch (err) {
-    // Fail silently in offline / static mode
   }
 }
 
 window.syncAdminProducts = syncAdminProducts;
 window.fetchServerProducts = fetchServerProducts;
+

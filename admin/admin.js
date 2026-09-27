@@ -1414,50 +1414,65 @@ async function saveProducts() {
   localStorage.setItem("alfakhama_products", JSON.stringify(products));
   window.dispatchEvent(new CustomEvent("alfakhamaProductsUpdated"));
 
-  // Persist products to server backend
-  try {
-    const res = await fetch("/api/admin/products", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Admin-Key": currentSecretKey
-      },
-      body: JSON.stringify({ products })
-    });
-    if (!res.ok) {
-      await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ products })
-      });
-    }
-  } catch (err) {
+  // Persist products to server backend (Multi-endpoint retry for Hostinger Apache/PHP & Node.js)
+  const endpoints = [
+    "../api/products.php",
+    "/api/products.php",
+    "/api/admin/products",
+    "/api/products"
+  ];
+
+  let synced = false;
+  for (const url of endpoints) {
     try {
-      await fetch("/api/products", {
+      const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Key": currentSecretKey
+        },
         body: JSON.stringify({ products })
       });
-    } catch (e) {
-      console.warn("Could not sync products to server:", e);
-    }
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success) {
+          synced = true;
+          break;
+        }
+      }
+    } catch (err) {}
+  }
+
+  if (synced) {
+    showToast("✅ Product saved and synced to Hostinger server!");
+  } else {
+    showToast("✓ Product saved in browser memory.");
   }
 }
 
 async function loadServerProducts() {
-  try {
-    const res = await fetch("/api/products");
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
-        products = data.products;
-        localStorage.setItem("alfakhama_products", JSON.stringify(products));
-        renderProducts();
-        renderCategories();
+  const endpoints = [
+    `../api/products.php?v=${Date.now()}`,
+    `/api/products.php?v=${Date.now()}`,
+    `/api/products?v=${Date.now()}`,
+    `../database/products.json?v=${Date.now()}`
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const prods = Array.isArray(data) ? data : (data && data.products ? data.products : null);
+        if (Array.isArray(prods) && prods.length > 0) {
+          products = prods;
+          localStorage.setItem("alfakhama_products", JSON.stringify(products));
+          renderProducts();
+          renderCategories();
+          return;
+        }
       }
-    }
-  } catch (err) {
-    console.warn("Could not load server products in admin:", err);
+    } catch (err) {}
   }
 }
 
@@ -1633,47 +1648,53 @@ async function saveCmsContent() {
     window.alfakhamaLoadCustomContent();
   }
 
-  // Persist content to server backend
-  try {
-    const res = await fetch("/api/admin/content", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Admin-Key": currentSecretKey
-      },
-      body: JSON.stringify({ content: custom })
-    });
-    if (!res.ok) {
-      await fetch("/api/content", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: custom })
-      });
-    }
-  } catch (err) {
+  // Persist content to server backend (Multi-endpoint retry for Hostinger PHP & Node)
+  const endpoints = [
+    "../api/content.php",
+    "/api/content.php",
+    "/api/admin/content",
+    "/api/content"
+  ];
+
+  for (const url of endpoints) {
     try {
-      await fetch("/api/content", {
+      const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Key": currentSecretKey
+        },
         body: JSON.stringify({ content: custom })
       });
-    } catch (e) {}
+      if (res.ok) break;
+    } catch (err) {}
   }
 
   showToast("✓ Website content saved! Changes are live across all pages.");
 }
 
 async function loadServerContent() {
-  try {
-    const res = await fetch("/api/content");
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.success && data.content && (data.content.en || data.content.ar)) {
-        localStorage.setItem("alfakhama_custom_content", JSON.stringify(data.content));
-        populateCmsFields();
+  const endpoints = [
+    `../api/content.php?v=${Date.now()}`,
+    `/api/content.php?v=${Date.now()}`,
+    `/api/content?v=${Date.now()}`,
+    `../database/content.json?v=${Date.now()}`
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        const content = data && data.content ? data.content : data;
+        if (content && (content.en || content.ar)) {
+          localStorage.setItem("alfakhama_custom_content", JSON.stringify(content));
+          populateCmsFields();
+          return;
+        }
       }
-    }
-  } catch (err) {}
+    } catch (err) {}
+  }
 }
 
 

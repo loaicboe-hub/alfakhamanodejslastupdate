@@ -44,6 +44,7 @@ async function deploy() {
         console.log("✅ Authenticated & Connected successfully via FTPS (TLSv1.3)\n");
 
         const itemsToUpload = [
+            ".htaccess",
             "index.html",
             "favicon.ico",
             "package.json",
@@ -51,6 +52,7 @@ async function deploy() {
             "server.js",
             ".env",
             "admin",
+            "api",
             "assets",
             "css",
             "js",

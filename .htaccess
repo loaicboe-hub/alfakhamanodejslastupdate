@@ -1,0 +1,36 @@
+# ==============================================================================
+# AL FAKHAMA FACTORY - HOSTINGER APACHE / LITESPEED CONFIGURATION
+# ==============================================================================
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Increase PHP limits for large base64 image uploads
+    <IfModule mod_php.c>
+        php_value upload_max_filesize 25M
+        php_value post_max_size 25M
+        php_value memory_limit 128M
+    </IfModule>
+
+    # API Routing to PHP endpoints
+    RewriteRule ^api/products/?$ api/products.php [L,QSA]
+    RewriteRule ^api/admin/products/?$ api/products.php [L,QSA]
+    RewriteRule ^api/content/?$ api/content.php [L,QSA]
+    RewriteRule ^api/admin/content/?$ api/content.php [L,QSA]
+    RewriteRule ^api/rfq/submit/?$ api/submit_rfq.php [L,QSA]
+    RewriteRule ^api/submit_rfq\.php$ api/submit_rfq.php [L,QSA]
+    RewriteRule ^api/admin/quotes/?$ api/get_quotes.php [L,QSA]
+    RewriteRule ^api/get_quotes\.php$ api/get_quotes.php [L,QSA]
+</IfModule>
+
+# Set CORS and Security Headers
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header set Access-Control-Allow-Headers "Content-Type, X-Admin-Key, Authorization"
+</IfModule>
+
+# Disable Directory Browsing
+Options -Indexes
