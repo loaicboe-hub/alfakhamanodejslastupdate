@@ -600,7 +600,8 @@ function openSpecsModal(productId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  applyAdminProductOrder();
+  syncAdminProducts();
+  fetchServerProducts();
   initProducts();
   const grid = document.querySelector(".products-grid");
   if (grid) {
@@ -611,13 +612,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.addEventListener("languageChanged", () => {
   selectCategory(currentParentCategory);
+  syncAdminProducts();
+});
+
+window.addEventListener("storage", (e) => {
+  if (e.key === "alfakhama_products") {
+    syncAdminProducts();
+  }
+});
+
+window.addEventListener("alfakhamaProductsUpdated", () => {
+  syncAdminProducts();
 });
 
 /**
- * Reads the admin-saved product order from localStorage and reorders
- * the DOM product cards on the home page to match.
+ * Normalizes image paths from Admin (which use ../assets/ or data: or /assets/)
+ * to direct valid paths for the website home page (assets/images/...).
  */
-function applyAdminProductOrder() {
+function normalizeProductImagePath(img) {
+  if (!img || typeof img !== "string") return "assets/images/cut_classic_9mm.jpg";
+  if (img.startsWith("data:") || img.startsWith("http://") || img.startsWith("https://")) {
+    return img;
+  }
+  let clean = img.replace(/^\.\.\//, "").replace(/^\/+/, "");
+  return clean;
+}
+
+/**
+ * Synchronizes DOM product cards on the website homepage with admin-saved products
+ * (updates images, titles, cut badges, specs, and reorders).
+ */
+function syncAdminProducts() {
   try {
     const stored = localStorage.getItem("alfakhama_products");
     if (!stored) return;
@@ -628,57 +653,123 @@ function applyAdminProductOrder() {
     const grid = document.querySelector(".products-grid");
     if (!grid) return;
 
-    // Build a map: data-category slug → card element
-    // Admin products have a "cut" or "name" field we can match to card data-category
-    // Strategy: match by image filename keyword or by name keyword
     const cards = Array.from(grid.querySelectorAll(".product-card"));
     if (cards.length === 0) return;
 
-    // Map each admin product to a card by matching known keywords
+    // Mapping keywords to dataCategory
     const categoryKeywordMap = [
-      { keywords: ["shoestring", "7mm", "6mm"],         dataCategory: "shoestring" },
-      { keywords: ["classic", "9mm"],                   dataCategory: "classic" },
-      { keywords: ["thick", "steak", "12mm", "10mm", "12x12"], dataCategory: "thick" },
-      { keywords: ["crinkle chip", "crinkle chips", "chips", "شيبسي"], dataCategory: "crinkle-chips" },
-      { keywords: ["crinkle", "wedge"],                 dataCategory: "crinkle-wedges" },
-      { keywords: ["mixed veg", "peas", "garden"],      dataCategory: "mixed-veg" },
-      { keywords: ["green bean"],                       dataCategory: "green-beans" },
-      { keywords: ["okra"],                             dataCategory: "okra" },
-      { keywords: ["molokhia"],                         dataCategory: "molokhia" },
-      { keywords: ["strawberr"],                        dataCategory: "strawberries" },
-      { keywords: ["mango"],                            dataCategory: "mango" },
+      { keywords: ["shoestring", "7mm", "6mm"],         dataCategory: "shoestring", specKey: "shoestring-7mm" },
+      { keywords: ["classic", "9mm"],                   dataCategory: "classic", specKey: "classic-9mm" },
+      { keywords: ["thick", "steak", "12mm", "10mm", "12x12"], dataCategory: "thick", specKey: "thick-12mm" },
+      { keywords: ["crinkle chip", "crinkle chips", "chips", "شيبسي"], dataCategory: "crinkle-chips", specKey: "crinkle-chips" },
+      { keywords: ["crinkle", "wedge"],                 dataCategory: "crinkle-wedges", specKey: "crinkle-wedges" },
+      { keywords: ["mixed veg", "peas", "garden"],      dataCategory: "mixed-veg", specKey: "mixed-vegetables" },
+      { keywords: ["green bean"],                       dataCategory: "green-beans", specKey: "green-beans" },
+      { keywords: ["okra"],                             dataCategory: "okra", specKey: "okra-zero" },
+      { keywords: ["molokhia"],                         dataCategory: "molokhia", specKey: "molokhia" },
+      { keywords: ["strawberr"],                        dataCategory: "strawberries", specKey: "egyptian-strawberries" },
+      { keywords: ["mango"],                            dataCategory: "mango", specKey: "mango-chunks" },
     ];
 
-    // Build a lookup: dataCategory → card element
+    // Build lookup: dataCategory -> card element
     const cardMap = {};
     cards.forEach(card => {
       const cat = card.getAttribute("data-category");
       if (cat) cardMap[cat] = card;
     });
 
-    // For each admin product (in order), find the matching card and re-append it
     const reordered = [];
+
     adminProducts.forEach(prod => {
       const nameLower = (prod.name || "").toLowerCase();
-      for (const { keywords, dataCategory } of categoryKeywordMap) {
+      for (const { keywords, dataCategory, specKey } of categoryKeywordMap) {
         if (keywords.some(kw => nameLower.includes(kw))) {
-          if (cardMap[dataCategory] && !reordered.includes(cardMap[dataCategory])) {
-            reordered.push(cardMap[dataCategory]);
+          const card = cardMap[dataCategory];
+          if (card) {
+            // 1. Update Product Image on Home Page
+            if (prod.img) {
+              const imgEl = card.querySelector(".product-image-box img, .product-img-wrap img, img");
+              if (imgEl) {
+                const targetSrc = normalizeProductImagePath(prod.img);
+                imgEl.src = targetSrc;
+                if (prod.name) imgEl.alt = prod.name;
+              }
+            }
+
+            // 2. Update Cut Badge if customized
+            if (prod.cut) {
+              const cutBadge = card.querySelector(".product-cut-badge");
+              if (cutBadge && !cutBadge.hasAttribute("data-i18n")) {
+                cutBadge.textContent = prod.cut;
+              }
+            }
+
+            // 3. Update Specs Table on the card
+            const specTable = card.querySelector(".product-spec-table");
+            if (specTable) {
+              const rows = specTable.querySelectorAll("tr");
+              rows.forEach(row => {
+                const tdLabel = row.querySelector("td:first-child");
+                const tdVal = row.querySelector("td:last-child");
+                if (!tdLabel || !tdVal) return;
+                const labelText = tdLabel.textContent.toLowerCase();
+                if (labelText.includes("cut") && prod.cut && !tdVal.hasAttribute("data-i18n")) tdVal.textContent = prod.cut;
+                if ((labelText.includes("state") || labelText.includes("processing")) && prod.type && !tdVal.hasAttribute("data-i18n")) tdVal.textContent = prod.type;
+                if (labelText.includes("storage") && prod.storage && !tdVal.hasAttribute("data-i18n")) tdVal.textContent = prod.storage;
+              });
+            }
+
+            // 4. Update Technical Specs Modal Data
+            if (specKey && productSpecsData[specKey]) {
+              const currentL = (typeof currentLang !== "undefined" && currentLang) ? currentLang : "en";
+              if (productSpecsData[specKey][currentL]) {
+                if (prod.cut) productSpecsData[specKey][currentL].cut = prod.cut;
+                if (prod.type) productSpecsData[specKey][currentL].type = prod.type;
+                if (prod.fryTime) productSpecsData[specKey][currentL].fryTime = prod.fryTime;
+                if (prod.storage) productSpecsData[specKey][currentL].storage = prod.storage;
+                if (prod.pkg) productSpecsData[specKey][currentL].packaging = prod.pkg;
+              }
+            }
+
+            if (!reordered.includes(card)) {
+              reordered.push(card);
+            }
             break;
           }
         }
       }
     });
 
-    // Append any cards not matched (so nothing is lost)
+    // Append any unmatched cards to preserve all cards
     cards.forEach(card => {
       if (!reordered.includes(card)) reordered.push(card);
     });
 
-    // Re-insert into DOM in new order
+    // Apply reordered list to the DOM grid
     reordered.forEach(card => grid.appendChild(card));
   } catch (e) {
-    // Fail silently — home page still works without reordering
-    console.warn("applyAdminProductOrder:", e);
+    console.warn("syncAdminProducts error:", e);
   }
 }
+
+/**
+ * Fetches server-stored products (/api/products) to ensure non-admin visitors
+ * and cross-device sessions immediately reflect the latest pictures and catalog.
+ */
+async function fetchServerProducts() {
+  try {
+    const res = await fetch("/api/products");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+        localStorage.setItem("alfakhama_products", JSON.stringify(data.products));
+        syncAdminProducts();
+      }
+    }
+  } catch (err) {
+    // Fail silently in offline / static mode
+  }
+}
+
+window.syncAdminProducts = syncAdminProducts;
+window.fetchServerProducts = fetchServerProducts;

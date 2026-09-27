@@ -259,8 +259,8 @@ try {
     let updated = false;
 
     products = products.map(p => {
-      // Fix broken .png paths
-      if (p.img && typeof p.img === "string" && p.img.endsWith(".png")) {
+      // Fix broken .png paths only if it's an old legacy static path and not custom data URL
+      if (p.img && typeof p.img === "string" && !p.img.startsWith("data:") && p.img.endsWith(".png")) {
         for (const [key, realPath] of Object.entries(assetHealMap)) {
           if (p.img.includes(key)) {
             p.img = realPath;
@@ -271,21 +271,6 @@ try {
           p.img = "../assets/images/cut_classic_9mm.jpg";
           updated = true;
         }
-      }
-
-      // Upgrade generic fruit images to specific separate images
-      if (p.name.toLowerCase().includes("strawberr") && (!p.img || p.img.includes("frozen_fruits"))) {
-        p.img = "../assets/images/frozen_strawberries.jpg";
-        updated = true;
-      }
-      if (p.name.toLowerCase().includes("mango") && (!p.img || p.img.includes("frozen_fruits"))) {
-        p.img = "../assets/images/frozen_mango.jpg";
-        updated = true;
-      }
-      // Upgrade crinkle cut & wedges image from old placeholder to dedicated crinkle/wedges photo
-      if ((p.name.toLowerCase().includes("crinkle") || p.name.toLowerCase().includes("wedges")) && (!p.img || p.img.includes("hero_half_fried"))) {
-        p.img = "../assets/images/cut_crinkle_wedges.jpg";
-        updated = true;
       }
 
       // Upgrade 10x10mm to 12x12mm in stored product data
@@ -347,6 +332,9 @@ document.addEventListener("DOMContentLoaded", () => {
   initAuthorityModule();
   initAuthKeyManager();
   initAuthAndLogoutSystem();
+
+  loadServerProducts();
+  loadServerContent();
 
   // Authentication gatekeeper
   if (isDashboardUnlocked) {
@@ -1422,8 +1410,55 @@ window.deleteProduct = function(id) {
   }
 };
 
-function saveProducts() {
+async function saveProducts() {
   localStorage.setItem("alfakhama_products", JSON.stringify(products));
+  window.dispatchEvent(new CustomEvent("alfakhamaProductsUpdated"));
+
+  // Persist products to server backend
+  try {
+    const res = await fetch("/api/admin/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Admin-Key": currentSecretKey
+      },
+      body: JSON.stringify({ products })
+    });
+    if (!res.ok) {
+      await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products })
+      });
+    }
+  } catch (err) {
+    try {
+      await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products })
+      });
+    } catch (e) {
+      console.warn("Could not sync products to server:", e);
+    }
+  }
+}
+
+async function loadServerProducts() {
+  try {
+    const res = await fetch("/api/products");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+        products = data.products;
+        localStorage.setItem("alfakhama_products", JSON.stringify(products));
+        renderProducts();
+        renderCategories();
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load server products in admin:", err);
+  }
 }
 
 // ============================================================================
@@ -1572,7 +1607,7 @@ function populateCmsFields() {
   });
 }
 
-function saveCmsContent() {
+async function saveCmsContent() {
   const custom = {
     en: {},
     ar: {}
@@ -1598,7 +1633,47 @@ function saveCmsContent() {
     window.alfakhamaLoadCustomContent();
   }
 
+  // Persist content to server backend
+  try {
+    const res = await fetch("/api/admin/content", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Admin-Key": currentSecretKey
+      },
+      body: JSON.stringify({ content: custom })
+    });
+    if (!res.ok) {
+      await fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: custom })
+      });
+    }
+  } catch (err) {
+    try {
+      await fetch("/api/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: custom })
+      });
+    } catch (e) {}
+  }
+
   showToast("✓ Website content saved! Changes are live across all pages.");
+}
+
+async function loadServerContent() {
+  try {
+    const res = await fetch("/api/content");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && data.content && (data.content.en || data.content.ar)) {
+        localStorage.setItem("alfakhama_custom_content", JSON.stringify(data.content));
+        populateCmsFields();
+      }
+    }
+  } catch (err) {}
 }
 
 

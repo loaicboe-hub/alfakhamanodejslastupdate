@@ -736,12 +736,28 @@ function toggleLanguage() {
   setLanguage(nextLang);
 }
 
+async function fetchServerContent() {
+  try {
+    const res = await fetch("/api/content");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success && data.content && (data.content.en || data.content.ar)) {
+        localStorage.setItem("alfakhama_custom_content", JSON.stringify(data.content));
+        loadCustomContent();
+        setLanguage(currentLang);
+      }
+    }
+  } catch (err) {}
+}
+
 // Expose translations globally for admin CMS synchronization
 window.alfakhamaTranslations = translations;
 window.alfakhamaLoadCustomContent = loadCustomContent;
+window.fetchServerContent = fetchServerContent;
 
 document.addEventListener("DOMContentLoaded", () => {
   loadCustomContent();
+  fetchServerContent();
   const savedLang = localStorage.getItem("alfakhama_lang") || "en";
   setLanguage(savedLang);
 

@@ -12,6 +12,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const mysql = require('mysql2/promise');
 const nodemailer = require('nodemailer');
@@ -30,8 +31,8 @@ app.use(
   })
 );
 app.use(cors());
-app.use(express.json({ limit: '2mb' }));
-app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // ── 2. Rate Limiters ──────────────────────────────────────────────────────────
 const rfqLimiter = rateLimit({
@@ -484,6 +485,76 @@ app.get('/api/get_quotes.php', adminLimiter, requireAdminAuth, handleAdminGetQuo
 
 app.post('/api/admin/quotes', adminLimiter, requireAdminAuth, handleAdminPostQuotes);
 app.post('/api/get_quotes.php', adminLimiter, requireAdminAuth, handleAdminPostQuotes);
+
+// ── Products API Endpoints (Sync between Admin and Live Website) ─────────────
+const productsFilePath = path.join(__dirname, 'database', 'products.json');
+const contentFilePath = path.join(__dirname, 'database', 'content.json');
+
+app.get('/api/products', (req, res) => {
+  try {
+    if (fs.existsSync(productsFilePath)) {
+      const data = fs.readFileSync(productsFilePath, 'utf8');
+      const products = JSON.parse(data);
+      return res.json({ success: true, products });
+    }
+  } catch (err) {
+    console.warn('Error reading products.json:', err.message);
+  }
+  return res.json({ success: true, products: [] });
+});
+
+function handleSaveProducts(req, res) {
+  try {
+    const products = req.body.products || req.body;
+    if (!Array.isArray(products)) {
+      return res.status(400).json({ success: false, message: 'Products must be an array.' });
+    }
+    const dbDir = path.join(__dirname, 'database');
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2), 'utf8');
+    return res.json({ success: true, message: 'Products successfully saved on server.', count: products.length });
+  } catch (err) {
+    console.error('Error saving products:', err);
+    return res.status(500).json({ success: false, message: 'Failed to write products to server storage.' });
+  }
+}
+
+app.post('/api/products', handleSaveProducts);
+app.post('/api/admin/products', requireAdminAuth, handleSaveProducts);
+
+// ── Live CMS Content API Endpoints ──────────────────────────────────────────
+app.get('/api/content', (req, res) => {
+  try {
+    if (fs.existsSync(contentFilePath)) {
+      const data = fs.readFileSync(contentFilePath, 'utf8');
+      const content = JSON.parse(data);
+      return res.json({ success: true, content });
+    }
+  } catch (err) {
+    console.warn('Error reading content.json:', err.message);
+  }
+  return res.json({ success: true, content: {} });
+});
+
+function handleSaveContent(req, res) {
+  try {
+    const content = req.body.content || req.body;
+    const dbDir = path.join(__dirname, 'database');
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    fs.writeFileSync(contentFilePath, JSON.stringify(content, null, 2), 'utf8');
+    return res.json({ success: true, message: 'Website content successfully saved on server.' });
+  } catch (err) {
+    console.error('Error saving content:', err);
+    return res.status(500).json({ success: false, message: 'Failed to write content to server storage.' });
+  }
+}
+
+app.post('/api/content', handleSaveContent);
+app.post('/api/admin/content', requireAdminAuth, handleSaveContent);
 
 // ── 7. Static Frontend & Admin Panel Serving ──────────────────────────────────
 const rootDir = __dirname;
